@@ -68,4 +68,4 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ## Contact
 
-For any questions or support, please contact [ooguz400@gmial.com] or open an issue on GitHub.
+For any questions or support,open an issue on GitHub.
