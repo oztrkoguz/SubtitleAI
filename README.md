@@ -14,7 +14,7 @@ YouTube Video Summarizer is a tool that processes YouTube videos to generate sce
 - **Translation**: Translates descriptions to Turkish using the M2M100 model.
 - **Subtitled Video**: Creates a video with subtitles based on the translated descriptions.
 - **Text-to-Speech**: Generates a narrated video using TTS models for English and Turkish.
-- **Summary Generation**: Provides a summary of the video content in the selected language.
+- **Summary Generation**: Provides a summary of the video content in the selected language using Ollama.
 
 ## Installation
 
