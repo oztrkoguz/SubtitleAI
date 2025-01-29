@@ -62,7 +62,7 @@ YouTube Video Summarizer is a tool that processes YouTube videos to generate sce
 
 ## Models Used
 
-- **MiniCPM**: For generating scene descriptions.
+- **MiniCPM**: For generating scene descriptions.[MiniCPM](https://huggingface.co/openbmb/MiniCPM-o-2_6)
 - **M2M100**: For translating descriptions from English to Turkish.
 - **TTS Models**: For generating audio narration in English and Turkish.
 
