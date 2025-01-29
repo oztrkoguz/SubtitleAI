@@ -22,6 +22,7 @@ SubtitleAI is a tool that processes YouTube videos to generate scene description
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/oztrkoguz/SubtitleAI.git
+   cd SubtitleAI
    ```
 
 2. **Create a virtual environment:**
