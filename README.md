@@ -55,7 +55,6 @@ SubtitleAI is a tool that processes YouTube videos to generate scene description
 - **subtitle.py**: Manages subtitle creation and video rendering.
 - **app.py**: Main application logic using Gradio for the user interface.
 - **tts.py**: Generates text-to-speech audio for the video.
-- **requirements.txt**: Lists all the dependencies required for the project.
 
 ## Models Used
 
