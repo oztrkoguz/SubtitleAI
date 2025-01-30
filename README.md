@@ -4,7 +4,10 @@ SubtitleAI is a tool that processes YouTube videos to generate scene description
 ![image](https://github.com/user-attachments/assets/b363a364-edcf-4c42-90f7-c0d941e0aef3)
 
 
-https://github.com/user-attachments/assets/b33abf5d-bddf-4fb9-a716-d58c5373599b
+
+https://github.com/user-attachments/assets/c3e0a523-8ec7-4476-b377-13cc1a45a932
+
+
 
 
 
