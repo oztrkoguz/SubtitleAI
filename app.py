@@ -5,9 +5,7 @@ from describe import (
     encode_video, 
     generate_frame_descriptions, 
     summarize_with_ollama,
-    model, 
-    tokenizer,
-    translate_and_enhance_with_m2m
+    translate_and_enhance_with_ollama
 )
 from subtitle import create_subtitled_video
 from tts import create_video_with_tts
@@ -54,15 +52,15 @@ def process_video_with_lang(video_input, video_url, selected_lang, font_size, fo
         frames, scene_times = encode_video(video_path)
         
         # 2. Generate English descriptions
-        original_descriptions = generate_frame_descriptions(frames, tokenizer, model, scene_times)
+        original_descriptions = generate_frame_descriptions(frames, scene_times)
         
         # 3. Language check and translation
         lang_code = LANGUAGES[selected_lang]
-        
+        print(f"[APP] Çeviri fonksiyonu çağrılıyor - target_lang: {lang_code}")
         # Translate if not English
         if lang_code != 'en':
             print("Translating descriptions...")
-            scene_descriptions = translate_and_enhance_with_m2m(original_descriptions, lang_code)
+            scene_descriptions = translate_and_enhance_with_ollama(original_descriptions, lang_code)
             print("\nFirst scene description:")
             print(f"Original (EN): {original_descriptions[0]}")
             print(f"Enhanced (TR): {scene_descriptions[0]}")
