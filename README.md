@@ -18,8 +18,8 @@ https://github.com/user-attachments/assets/c3e0a523-8ec7-4476-b377-13cc1a45a932
 
 - **Download YouTube Videos**: Automatically download videos from YouTube using a URL.
 - **Scene Detection**: Detects scene transitions in the video.
-- **Frame Description**: Generates English scene descriptions using the Gemma 3B:4b model fine-tuned or prompted for image captioning tasks.
-- **Translation**: Translates the English descriptions to Turkish using the Gemma 3B:4b model, guided for multilingual generation.
+- **Frame Description**: Generates English scene descriptions using the Gemma 3:4b model fine-tuned or prompted for image captioning tasks.
+- **Translation**: Translates the English descriptions to Turkish using the Gemma 3:4b model, guided for multilingual generation.
 - **Subtitled Video**: Creates a video with subtitles based on the translated descriptions.
 - **Text-to-Speech**: Generates a narrated video using TTS models for English and Turkish.
 - **Summary Generation**: Provides a summary of the video content in the selected language using Ollama.
