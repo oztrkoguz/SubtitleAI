@@ -1,7 +1,18 @@
 # 🎥 SubtitleAI
-YouTube Video Summarizer is a tool that processes YouTube videos to generate scene descriptions, translate them, and create a subtitled video with text-to-speech narration. This project leverages state-of-the-art models for video processing, translation, and text-to-speech synthesis.
+SubtitleAI is a tool that processes YouTube videos to generate scene descriptions, translate them, and create a subtitled video with text-to-speech narration. This project leverages state-of-the-art models for video processing, translation, and text-to-speech synthesis.
 
 ![image](https://github.com/user-attachments/assets/b363a364-edcf-4c42-90f7-c0d941e0aef3)
+
+
+
+https://github.com/user-attachments/assets/c3e0a523-8ec7-4476-b377-13cc1a45a932
+
+
+
+
+
+**Note: This is a prototype and further development is planned to enhance its features and capabilities.**
+
 
 ## Features
 
@@ -17,8 +28,8 @@ YouTube Video Summarizer is a tool that processes YouTube videos to generate sce
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/youtube-video-summarizer.git
-   cd youtube-video-summarizer
+   git clone https://github.com/oztrkoguz/SubtitleAI.git
+   cd SubtitleAI
    ```
 
 2. **Create a virtual environment:**
@@ -55,7 +66,6 @@ YouTube Video Summarizer is a tool that processes YouTube videos to generate sce
 - **subtitle.py**: Manages subtitle creation and video rendering.
 - **app.py**: Main application logic using Gradio for the user interface.
 - **tts.py**: Generates text-to-speech audio for the video.
-- **requirements.txt**: Lists all the dependencies required for the project.
 
 ## Models Used
 

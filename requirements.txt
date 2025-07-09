@@ -13,4 +13,8 @@ scipy==1.11.4
 scenedetect==0.6.5.2
 sentencepiece==0.2.0
 protobuf==5.29.3
+<<<<<<< HEAD
 sacremoses>=0.0.53 
+=======
+sacremoses>=0.0.53 
+>>>>>>> 9693368854e42d21b38cf0ae6ce3cda7b90f021b
