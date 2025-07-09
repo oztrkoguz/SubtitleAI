@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/c3e0a523-8ec7-4476-b377-13cc1a45a932
 
 
 
-**Note: This is a prototype and further development is planned to enhance its features and capabilities.**
+**Note: The project is currently under active development and will be further enhanced with new features over time.**
 
 
 ## Features
