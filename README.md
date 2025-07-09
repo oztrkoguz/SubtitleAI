@@ -69,7 +69,7 @@ https://github.com/user-attachments/assets/c3e0a523-8ec7-4476-b377-13cc1a45a932
 
 ## Models Used
 
-- **MiniCPM**: For generating scene descriptions.[MiniCPM](https://huggingface.co/openbmb/MiniCPM-o-2_6)
+- **Gemma3:4b**: For generating scene descriptions.[Gemma3:4b](https://ollama.com/library/gemma3:4b)
 - **Gemma3:4b**: For translating descriptions from English to Turkish.[Gemma3:4b](https://ollama.com/library/gemma3:4b)
 - **TTS Models**: For generating audio narration in English and Turkish.[TTS Models](https://huggingface.co/soohyunn/glow-tts)
 - **Ollama**: For generating a coherent summary of the video content.[Mistral](https://ollama.com/library/mistral)
