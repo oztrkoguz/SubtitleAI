@@ -18,8 +18,8 @@ https://github.com/user-attachments/assets/c3e0a523-8ec7-4476-b377-13cc1a45a932
 
 - **Download YouTube Videos**: Automatically download videos from YouTube using a URL.
 - **Scene Detection**: Detects scene transitions in the video.
-- **Frame Description**: Generates English scene descriptions using the Gemma 3:4b model fine-tuned or prompted for image captioning tasks.
-- **Translation**: Translates the English descriptions to Turkish using the Gemma 3:4b model, guided for multilingual generation.
+- **Frame Description**: Generates English scene descriptions using the Gemma3:4b model fine-tuned or prompted for image captioning tasks.
+- **Translation**: Translates the English descriptions to Turkish using the Gemma3:4b model, guided for multilingual generation.
 - **Subtitled Video**: Creates a video with subtitles based on the translated descriptions.
 - **Text-to-Speech**: Generates a narrated video using TTS models for English and Turkish.
 - **Summary Generation**: Provides a summary of the video content in the selected language using Ollama.
@@ -70,7 +70,7 @@ https://github.com/user-attachments/assets/c3e0a523-8ec7-4476-b377-13cc1a45a932
 ## Models Used
 
 - **MiniCPM**: For generating scene descriptions.[MiniCPM](https://huggingface.co/openbmb/MiniCPM-o-2_6)
-- **M2M100**: For translating descriptions from English to Turkish.[M2M100](https://huggingface.co/facebook/m2m100_418M)
+- **Gemma3:4b**: For translating descriptions from English to Turkish.[M2M100]([https://huggingface.co/facebook/m2m100_418M](https://ollama.com/library/gemma3:4b))
 - **TTS Models**: For generating audio narration in English and Turkish.[TTS Models](https://huggingface.co/soohyunn/glow-tts)
 - **Ollama**: For generating a coherent summary of the video content.[Mistral](https://ollama.com/library/mistral)
 
