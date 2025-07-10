@@ -34,20 +34,6 @@ def create_text_frame(text, frame_size, config):
     else:  # middle
         y = (frame_size[1] - text_height) // 2
     
-    # Draw black outline
-    offsets = [
-        (-2, -2), (2, -2), (-2, 2), (2, 2),
-        (-2, 0), (2, 0), (0, -2), (0, 2)
-    ]
-    
-    for offset_x, offset_y in offsets:
-        draw.text(
-            (x + offset_x, y + offset_y),
-            wrapped_text,
-            font=font,
-            fill='black'
-        )
-    
     # Draw colored text using hex color
     draw.text(
         (x, y), 
