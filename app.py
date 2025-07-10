@@ -27,16 +27,33 @@ SUBTITLE_COLORS = {
     'Pink': '#FFC0CB'
 }
 
-# Available fonts
-SUBTITLE_FONTS = {
-    'Arial': 'arial.ttf',
-    'Times New Roman': 'times.ttf',
-    'Verdana': 'verdana.ttf',
-    'Courier New': 'cour.ttf',
-    'Comic Sans': 'comic.ttf',
-    'Impact': 'impact.ttf',
-    'Default': None
-}
+# Available fonts - dinamik olarak fonts klasöründen yükle
+def get_available_fonts():
+    fonts_dir = os.path.join(os.getcwd(), 'fonts')
+    fonts = {'Default': None}  # Varsayılan font
+    
+    # Fonts klasörü yoksa oluştur
+    if not os.path.exists(fonts_dir):
+        os.makedirs(fonts_dir)
+        print(f"Fonts klasörü oluşturuldu: {fonts_dir}")
+        print("TTF font dosyalarınızı bu klasöre ekleyebilirsiniz.")
+    
+    if os.path.exists(fonts_dir):
+        font_count = 0
+        for font_file in os.listdir(fonts_dir):
+            if font_file.lower().endswith('.ttf'):
+                font_name = os.path.splitext(font_file)[0]
+                font_path = os.path.join(fonts_dir, font_file)
+                fonts[font_name] = font_path
+                font_count += 1
+        
+        print(f"Fonts klasöründen {font_count} adet font yüklendi.")
+        if font_count == 0:
+            print("Fonts klasörü boş. TTF dosyalarınızı ekleyin.")
+                
+    return fonts
+
+SUBTITLE_FONTS = get_available_fonts()
 
 def process_video_with_lang(video_input, video_url, selected_lang, font_size, font_color, text_position, font_family):
     """Process video and generate summary"""
