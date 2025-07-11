@@ -20,7 +20,7 @@ https://github.com/user-attachments/assets/6cd0071c-0ffb-4779-9677-04b1101539f2
 
 ## Features
 
-- **Download YouTube Videos**: Automatically download videos from YouTube using a URL.
+- **Download YouTube & TikTok Videos:**: Automatically download videos from YouTube or TikTok using a URL.
 - **Scene Detection**: Detects scene transitions in the video.
 - **Frame Description**: Generates English scene descriptions using the Gemma3:4b model fine-tuned or prompted for image captioning tasks.
 - **Translation**: Translates the English descriptions to Turkish using the Gemma3:4b model, guided for multilingual generation.
@@ -54,7 +54,7 @@ https://github.com/user-attachments/assets/6cd0071c-0ffb-4779-9677-04b1101539f2
    python app.py
    ```
 
-2. **Upload a video or enter a YouTube URL**: You can either upload a video file or provide a YouTube URL for processing.
+2. **Upload a video or enter a YouTube/TikTok URL**: You can either upload a video file or provide a video URL from YouTube or TikTok.
 
 3. **Select Language**: Choose the language for descriptions and voice (English or Turkish).
 
