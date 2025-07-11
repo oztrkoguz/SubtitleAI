@@ -2,6 +2,7 @@ import gradio as gr
 import os
 from describe import (
     download_youtube_video, 
+    download_video_from_url,
     encode_video, 
     generate_frame_descriptions, 
     summarize_with_ollama,
@@ -55,15 +56,21 @@ def get_available_fonts():
 
 SUBTITLE_FONTS = get_available_fonts()
 
-def process_video_with_lang(video_input, video_url, selected_lang, font_size, font_color, text_position, font_family):
+def process_video_with_lang(video_input, youtube_url, tiktok_url, selected_lang, font_size, font_color, text_position, font_family):
     """Process video and generate summary"""
     try:
-        # 1. Process video
-        if video_url:
-            video_path = download_youtube_video(video_url)
-        elif isinstance(video_input, str) and (video_input.startswith(('http://', 'https://', 'www.', 'youtube.com', 'youtu.be'))):
-            video_path = download_youtube_video(video_input)
+        # 1. Process video - URL priority: TikTok > YouTube > Upload
+        if tiktok_url and tiktok_url.strip():
+            print("Processing TikTok URL...")
+            video_path = download_video_from_url(tiktok_url.strip())
+        elif youtube_url and youtube_url.strip():
+            print("Processing YouTube URL...")
+            video_path = download_video_from_url(youtube_url.strip())
+        elif isinstance(video_input, str) and (video_input.startswith(('http://', 'https://'))):
+            print("Processing URL from video input...")
+            video_path = download_video_from_url(video_input)
         else:
+            print("Processing uploaded video...")
             video_path = video_input.name if hasattr(video_input, 'name') else video_input
             
         frames, scene_times = encode_video(video_path)
@@ -126,9 +133,21 @@ def create_interface():
         
         with gr.Row():
             with gr.Column():
-                # Video input
-                video_input = gr.Video(label="Upload Video")
-                video_url = gr.Textbox(label="Enter YouTube URL", placeholder="https://www.youtube.com/watch?v=example")
+                # Video input options
+                gr.Markdown("### 📹 Video Input Options")
+                video_input = gr.Video(label="📁 Upload Video File")
+                
+                with gr.Row():
+                    youtube_url = gr.Textbox(
+                        label="🎬 YouTube URL", 
+                        placeholder="https://www.youtube.com/watch?v=example",
+                        scale=1
+                    )
+                    tiktok_url = gr.Textbox(
+                        label="📱 TikTok URL", 
+                        placeholder="https://www.tiktok.com/@user/video/123456789",
+                        scale=1
+                    )
                 
                 # Language selection
                 language = gr.Dropdown(
@@ -186,7 +205,8 @@ def create_interface():
             fn=process_video_with_lang,
             inputs=[
                 video_input, 
-                video_url,
+                youtube_url,
+                tiktok_url,
                 language,
                 font_size,
                 font_color,
@@ -197,15 +217,18 @@ def create_interface():
         )
         
         gr.Markdown("""
-        ### How to Use:
-        1. Upload a video or enter a YouTube URL
-        2. Select description and voice language
-        3. Customize subtitle appearance:
-           - Adjust font size
-           - Choose font color
-           - Set text position
-        4. Click 'Process Video'
-        5. Wait for the processed video and summary
+        ### 📖 How to Use:
+        1. **Choose video input method:**
+           - 📁 Upload a video file OR
+           - 🎬 Enter YouTube URL OR  
+           - 📱 Enter TikTok URL
+        2. **Select language** for descriptions and voice
+        3. **Customize subtitles:**
+           - Font size, color, position, family
+        4. **Click 'Process Video'**
+        5. **Wait** for AI processing and final video
+        
+        ⚠️ **Note:** TikTok videos are optimized for short content analysis
         """)
     
     return interface

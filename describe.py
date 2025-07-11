@@ -40,11 +40,69 @@ def extract_overall_impression(text):
 
 
 
-def download_youtube_video(url):
-    """Download YouTube video and return temp file path"""
+def download_tiktok_specific(url):
+    """TikTok videosunu indirir - özel fonksiyon"""
     try:
-        print("Downloading video...")
+        print("TikTok video indiriliyor...")
         
+        # TikTok için çok esnek format ayarları
+        ydl_opts = {
+            'format': 'best[ext=mp4]/best',  # En basit format seçimi
+            'outtmpl': os.path.join(tempfile.gettempdir(), '%(id)s.%(ext)s'),
+            'writesubtitles': False,
+            'writeautomaticsub': False,
+            'noplaylist': True,
+            'extract_flat': False,
+            'quiet': False,  # Debug için ses açık
+            'no_warnings': False,
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            print("Video bilgileri alınıyor...")
+            info = ydl.extract_info(url, download=True)
+            video_id = info.get('id', 'tiktok_video')
+            
+            # Dosya uzantısını kontrol et
+            ext = info.get('ext', 'mp4')
+            video_path = os.path.join(tempfile.gettempdir(), f"{video_id}.{ext}")
+            
+            # Eğer mp4 değilse mp4'e çevir
+            if ext != 'mp4':
+                mp4_path = os.path.join(tempfile.gettempdir(), f"{video_id}.mp4")
+                print(f"Converting {ext} to mp4...")
+                try:
+                    import subprocess
+                    subprocess.run(['ffmpeg', '-i', video_path, '-c', 'copy', mp4_path], 
+                                 check=True, capture_output=True)
+                    os.remove(video_path)
+                    video_path = mp4_path
+                except:
+                    print("FFmpeg conversion failed, using original file")
+            
+            print(f"✅ TikTok video downloaded: {video_path}")
+            return video_path
+            
+    except Exception as e:
+        raise Exception(f"TikTok download error: {str(e)}")
+
+def download_video_from_url(url):
+    """Download video from YouTube, TikTok or other platforms"""
+    try:
+        print(f"Downloading video from: {url}")
+        
+        # URL tipini kontrol et
+        if 'tiktok.com' in url.lower():
+            print("TikTok video detected...")
+            # TikTok için özel fonksiyon kullan
+            return download_tiktok_specific(url)
+        elif any(x in url.lower() for x in ['youtube.com', 'youtu.be']):
+            print("YouTube video detected...")
+            platform = "YouTube"
+        else:
+            print("Other platform video detected...")
+            platform = "Other"
+        
+        # YouTube ve diğer platformlar için standart ayarlar
         ydl_opts = {
             'format': 'best[ext=mp4]',
             'outtmpl': os.path.join(tempfile.gettempdir(), '%(id)s.%(ext)s'),
@@ -54,23 +112,66 @@ def download_youtube_video(url):
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            video_path = os.path.join(tempfile.gettempdir(), f"{info['id']}.mp4")
-            print(f"Video downloaded successfully: {video_path}")
+            video_id = info.get('id', 'video')
+            video_path = os.path.join(tempfile.gettempdir(), f"{video_id}.mp4")
+            
+            print(f"✅ {platform} video downloaded successfully: {video_path}")
             return video_path
             
     except Exception as e:
         raise Exception(f"Video download error: {str(e)}")
 
+# Geriye uyumluluk için eski fonksiyon adını koruyalım
+def download_youtube_video(url):
+    """Backward compatibility wrapper"""
+    return download_video_from_url(url)
+
 def detect_scenes(video_path):
     """Detect scene transitions in video"""
     try:
         print("Detecting scenes...")
-        scenes = detect(video_path, ContentDetector())
-        scene_times = [scene[0].get_seconds() for scene in scenes]
-        print(f"Number of scenes detected: {len(scene_times)}")
+        
+        # Önce video süresini kontrol et
+        from moviepy.editor import VideoFileClip
+        video = VideoFileClip(video_path)
+        duration = video.duration
+        video.close()
+        print(f"Video duration: {duration:.2f} seconds")
+        
+        # Sahne tespiti dene
+        try:
+            scenes = detect(video_path, ContentDetector(threshold=30.0))
+            scene_times = [scene[0].get_seconds() for scene in scenes]
+            print(f"Number of scenes detected: {len(scene_times)}")
+        except Exception as scene_error:
+            print(f"Automatic scene detection failed: {str(scene_error)}")
+            scene_times = []
+        
+        # Eğer hiç sahne tespit edilmediyse veya çok az sahne varsa
+        if len(scene_times) == 0 or (len(scene_times) == 1 and duration > 10):
+            print("Creating manual scenes for TikTok/short video...")
+            scene_times = []
+            
+            # Kısa videolar için (TikTok vb) - 5 saniyelik sahneler
+            if duration <= 60:
+                interval = min(5, duration / 3)  # En az 3 sahne
+            # Uzun videolar için - 10 saniyelik sahneler  
+            else:
+                interval = 10
+                
+            current_time = 0
+            while current_time < duration:
+                scene_times.append(current_time)
+                current_time += interval
+                
+            print(f"Created {len(scene_times)} manual scenes with {interval}s intervals")
+        
         return scene_times
+        
     except Exception as e:
-        raise Exception(f"Scene detection error: {str(e)}")
+        print(f"Scene detection error: {str(e)}")
+        # Son çare: Sadece başlangıç sahnesi
+        return [0.0]
 
 def encode_video(video_path):
     """Extract one frame from each scene"""
