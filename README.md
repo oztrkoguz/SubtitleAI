@@ -1,4 +1,4 @@
-# 🎥 SubtitleAI + Video Chatbot
+# 🎥 SubtitleAI 
 
 **AI-powered video subtitle generation and intelligent chat system**
 
