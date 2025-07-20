@@ -16,15 +16,6 @@ from langchain.chains import RetrievalQA
 from langchain_community.chat_models import ChatOllama
 from langchain.prompts import PromptTemplate
 
-# Required imports for RAG
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.schema import Document
-from langchain.chains import RetrievalQA
-from langchain_community.chat_models import ChatOllama
-from langchain.prompts import PromptTemplate
-
 class YouTubeToText:
     def __init__(self, enable_rag=False, embedding_model="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"):
         self.recognizer = sr.Recognizer()
