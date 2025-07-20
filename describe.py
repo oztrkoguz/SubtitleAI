@@ -351,7 +351,7 @@ def summarize_with_ollama(scene_descriptions, lang='en'):
     try:
         print("Generating summary...")
         
-        llm = OllamaLLM(model="mistral")
+        llm = OllamaLLM(model="phi4:latest")
         
         # Summary templates for English and Turkish
         summary_templates = {
