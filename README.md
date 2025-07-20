@@ -1,38 +1,41 @@
-# 🎥 SubtitleAI
-SubtitleAI is a tool that processes YouTube videos to generate scene descriptions, translate them, and create a subtitled video with text-to-speech narration. This project leverages state-of-the-art models for video processing, translation, and text-to-speech synthesis.
+# 🎥 SubtitleAI + Video Chatbot
 
+**AI-powered video subtitle generation and intelligent chat system**
 
+SubtitleAI is an advanced tool that processes YouTube and TikTok videos to generate scene descriptions, translate them, create subtitled videos with text-to-speech narration, and provides an intelligent chatbot for video content analysis. This project leverages state-of-the-art models for video processing, translation, text-to-speech synthesis, and RAG-based question answering.
 
-<img width="1920" height="1970" alt="images" src="https://github.com/user-attachments/assets/4f6355b2-9f36-40e9-aed5-d7c76a461e11" />
-
-
-
-
-
-
-
+<img width="1299" height="904" alt="gradio" src="https://github.com/user-attachments/assets/ec1d921e-5abb-4f11-9b9f-00542a4a7e47" />
 
 https://github.com/user-attachments/assets/6cd0071c-0ffb-4779-9677-04b1101539f2
 
-
-
-
-
-
 **Note: The project is currently under active development and will be further enhanced with new features over time.**
 
+## ✨ Features
 
-## Features
+### 🎬 Video Processing
+- **Download YouTube & TikTok Videos**: Automatically download videos from YouTube or TikTok using URLs
+- **Scene Detection**: Intelligent detection of scene transitions in videos
+- **Frame Description**: Generate English scene descriptions using Gemma3:4b model
+- **Multi-language Translation**: Translate descriptions to Turkish using Gemma3:4b model
+- **Custom Subtitles**: Create videos with customizable subtitles (font, color, position)
+- **Text-to-Speech**: Generate narrated videos using TTS models for English and Turkish
+- **Summary Generation**: Provide comprehensive video summaries in selected language
 
-- **Download YouTube & TikTok Videos:**: Automatically download videos from YouTube or TikTok using a URL.
-- **Scene Detection**: Detects scene transitions in the video.
-- **Frame Description**: Generates English scene descriptions using the Gemma3:4b model fine-tuned or prompted for image captioning tasks.
-- **Translation**: Translates the English descriptions to Turkish using the Gemma3:4b model, guided for multilingual generation.
-- **Subtitled Video**: Creates a video with subtitles based on the translated descriptions.
-- **Text-to-Speech**: Generates a narrated video using TTS models for English and Turkish.
-- **Summary Generation**: Provides a summary of the video content in the selected language using Ollama.
+### 🤖 Video Chatbot (NEW!)
+- **RAG-based Q&A**: Ask questions about video content using advanced RAG system
+- **Audio-to-Text**: Convert video audio to text using Whisper or Google Speech Recognition
+- **Multi-language Support**: Process videos in English and Turkish
+- **Intelligent Responses**: Get contextual answers based on video content
+- **Quick Setup**: Setup chatbot without full video processing for faster interaction
+- **Similarity Search**: Find relevant content sections in video transcripts
 
-## Installation
+### 🎨 User Interface
+- **Modern Gradio Interface**: Clean, responsive web interface
+- **Dual Action Mode**: Choose between full video processing or quick chatbot setup
+- **Real-time Status**: Live updates on processing status
+- **Dynamic Components**: Interface adapts based on selected actions
+
+## 🚀 Installation
 
 1. **Clone the repository:**
    ```bash
@@ -51,42 +54,138 @@ https://github.com/user-attachments/assets/6cd0071c-0ffb-4779-9677-04b1101539f2
    pip install -r requirements.txt
    ```
 
-## Usage
+4. **Install Ollama and required models:**
+   ```bash
+   # Install Ollama (visit https://ollama.ai for installation)
+   ollama pull phi4:latest
+   ollama pull gemma3:4b
+   ```
+
+5. **Install FFmpeg:**
+   - **Windows**: Download from https://ffmpeg.org/download.html
+   - **macOS**: `brew install ffmpeg`
+   - **Ubuntu**: `sudo apt install ffmpeg`
+
+## 📖 Usage
+
+### 🎬 Video Processing Mode
 
 1. **Run the application:**
    ```bash
    python app.py
    ```
 
-2. **Upload a video or enter a YouTube/TikTok URL**: You can either upload a video file or provide a video URL from YouTube or TikTok.
+2. **Input Video:**
+   - Upload a video file, OR
+   - Enter YouTube URL, OR
+   - Enter TikTok URL
 
-3. **Select Language**: Choose the language for descriptions and voice (English or Turkish).
+3. **Configure Settings:**
+   - Select language (English/Turkish)
+   - Customize subtitle settings (font, color, position)
 
-4. **Customize Subtitles**: Adjust font size, color, and position for subtitles.
+4. **Process Video:**
+   - Click "🎬 Process Video" button
+   - Wait for AI processing
+   - Get subtitled video + summary + chatbot
 
-5. **Process Video**: Click the "Process Video" button to start the processing.
+### 🤖 Quick Chatbot Mode
 
-6. **Output**: The processed video with subtitles and narration will be generated, along with a text summary.
+1. **Input Video URL:**
+   - Enter YouTube or TikTok URL
 
-## Components
+2. **Setup Chatbot:**
+   - Select language for audio processing
+   - Click "🤖 Setup Chatbot Only" button
+   - Wait for audio-to-text conversion
 
-- **describe.py**: Handles video downloading, scene detection, frame description, and translation.
-- **subtitle.py**: Manages subtitle creation and video rendering.
-- **app.py**: Main application logic using Gradio for the user interface.
-- **tts.py**: Generates text-to-speech audio for the video.
+3. **Ask Questions:**
+   - Chat interface becomes active
+   - Ask questions about video content
+   - Get intelligent AI responses
 
-## Models Used
+### 💬 Example Questions for Chatbot
+- "What is the main topic of this video?"
+- "Can you summarize the key points?"
+- "What does the speaker say about [specific topic]?"
+- "How long does the speaker talk about [subject]?"
 
-- **Gemma3:4b**: For generating scene descriptions.[Gemma3:4b](https://ollama.com/library/gemma3:4b)
-- **Gemma3:4b**: For translating descriptions from English to Turkish.[Gemma3:4b](https://ollama.com/library/gemma3:4b)
-- **TTS Models**: For generating audio narration in English and Turkish.[TTS Models](https://huggingface.co/soohyunn/glow-tts)
-- **Ollama**: For generating a coherent summary of the video content.[Mistral](https://ollama.com/library/mistral)
+## 🏗️ Components
 
+- **app.py**: Main application with Gradio interface and integrated chatbot
+- **describe.py**: Video downloading, scene detection, frame description, and translation
+- **subtitle.py**: Subtitle creation and video rendering
+- **tts.py**: Text-to-speech audio generation
+- **video_chat.py**: RAG-based chatbot system with audio-to-text conversion
 
-## Contributing
+## 🤖 Models & Technologies Used
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+### Video Processing
+- **[Gemma3:4b](https://ollama.com/library/gemma3:4b)**: Scene description generation
+- **[Gemma3:4b](https://ollama.com/library/gemma3:4b)**: English to Turkish translation
+- **[Phi4:latest](https://ollama.com/library/phi4)**: Video content summarization
 
-## Contact
+### Chatbot System
+- **[OpenAI Whisper](https://openai.com/research/whisper)**: Audio-to-text conversion
+- **[Google Speech Recognition](https://cloud.google.com/speech-to-text)**: Fallback audio processing
+- **[FAISS](https://faiss.ai/)**: Vector similarity search
+- **[LangChain](https://langchain.com/)**: RAG pipeline and document processing
+- **[Sentence Transformers](https://www.sbert.net/)**: Multilingual text embeddings
 
-For any questions or support,open an issue on GitHub.
+### Audio & Video
+- **[TTS Models](https://huggingface.co/soohyunn/glow-tts)**: Text-to-speech generation
+- **[yt-dlp](https://github.com/yt-dlp/yt-dlp)**: YouTube/TikTok video downloading
+- **[FFmpeg](https://ffmpeg.org/)**: Audio/video processing
+
+## 🔧 Requirements
+
+### System Requirements
+- Python 3.8+
+- FFmpeg installed and accessible
+- Internet connection for URL-based videos
+- At least 4GB RAM for optimal performance
+
+### AI Models
+- Ollama with phi4:latest and gemma3:4b models
+- Whisper model (automatically downloaded)
+- Sentence transformers model (automatically downloaded)
+
+## ⚠️ Important Notes
+
+- **Chatbot requires URLs**: Video chatbot only works with YouTube/TikTok URLs, not uploaded files
+- **TikTok optimization**: TikTok videos are optimized for short content analysis
+- **Language consistency**: Select the same language for both video processing and chatbot for best results
+- **Processing time**: Full video processing takes longer than chatbot-only setup
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Contact
+
+For questions, support, or feature requests:
+- Open an issue on [GitHub](https://github.com/oztrkoguz/SubtitleAI/issues)
+- Discussions: [GitHub Discussions](https://github.com/oztrkoguz/SubtitleAI/discussions)
+
+## 🎯 Roadmap
+
+- [ ] Support for more languages
+- [ ] Advanced video analysis features
+- [ ] Batch processing capabilities
+- [ ] API endpoints for integration
+- [ ] Mobile app development
+- [ ] Real-time video processing
+
+---
+
+**Made with ❤️ by the SubtitleAI team**
