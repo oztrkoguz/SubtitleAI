@@ -16,7 +16,7 @@ from langchain.chains import RetrievalQA
 from langchain_community.chat_models import ChatOllama
 from langchain.prompts import PromptTemplate
 
-# RAG için gerekli importlar
+# Required imports for RAG
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -28,13 +28,13 @@ from langchain.prompts import PromptTemplate
 class YouTubeToText:
     def __init__(self, enable_rag=False, embedding_model="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"):
         self.recognizer = sr.Recognizer()
-        # Whisper modelini yükle (daha iyi sonuçlar için)
+        # Load Whisper model (for better results)
         self.whisper_model = whisper.load_model("base")
         
-        # FFmpeg yolunu ayarla
+        # Setup FFmpeg path
         self.setup_ffmpeg()
         
-        # RAG sistemi
+        # RAG system
         self.enable_rag = enable_rag
         self.embedding_model_name = embedding_model
         self.vector_store = None
@@ -45,29 +45,29 @@ class YouTubeToText:
             self._setup_rag_system()
     
     def setup_ffmpeg(self):
-        """FFmpeg'i yapılandır"""
+        """Configure FFmpeg"""
         ffmpeg_path = self.find_ffmpeg_path()
         if ffmpeg_path:
-            # PATH'e ekle
+            # Add to PATH
             os.environ['PATH'] = ffmpeg_path + os.pathsep + os.environ.get('PATH', '')
-            print(f"✅ FFmpeg bulundu: {ffmpeg_path}")
+            print(f"✅ FFmpeg found: {ffmpeg_path}")
         else:
-            print("❌ FFmpeg bulunamadı!")
-            print("Çözüm önerileri:")
-            print("1. FFmpeg'i indirin: https://ffmpeg.org/download.html")
-            print("2. C:\\ffmpeg\\bin klasörüne çıkarın")
-            print("3. Veya conda ile kurun: conda install ffmpeg")
+            print("❌ FFmpeg not found!")
+            print("Solution suggestions:")
+            print("1. Download FFmpeg: https://ffmpeg.org/download.html")
+            print("2. Extract to C:\\ffmpeg\\bin folder")
+            print("3. Or install with conda: conda install ffmpeg")
     
     def find_ffmpeg_path(self):
-        """FFmpeg yolunu otomatik bul"""
+        """Automatically find FFmpeg path"""
         import shutil
         
-        # PATH'te ara
+        # Search in PATH
         ffmpeg_path = shutil.which("ffmpeg")
         if ffmpeg_path:
             return os.path.dirname(ffmpeg_path)
         
-        # Yaygın Windows yollarında ara
+        # Search in common Windows paths
         common_paths = [
             "C:\\ffmpeg\\bin",
             "C:\\Program Files\\ffmpeg\\bin",
@@ -82,32 +82,32 @@ class YouTubeToText:
         return None
 
     def test_ffmpeg(self):
-        """FFmpeg'in çalışıp çalışmadığını test et"""
+        """Test if FFmpeg is working"""
         try:
             result = subprocess.run(['ffmpeg', '-version'], 
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
-                print("✅ FFmpeg test başarılı")
+                print("✅ FFmpeg test successful")
                 return True
         except Exception as e:
-            print(f"❌ FFmpeg test başarısız: {e}")
+            print(f"❌ FFmpeg test failed: {e}")
         return False
 
     def download_audio(self, youtube_url, output_path="temp_audio.wav"):
-        """YouTube videosundan ses dosyasını indir"""
+        """Download audio file from YouTube video"""
         try:
-            # FFmpeg test et
+            # Test FFmpeg
             if not self.test_ffmpeg():
-                print("FFmpeg çalışmıyor, alternatif format denenecek...")
+                print("FFmpeg not working, trying alternative format...")
                 return self.download_audio_alternative(youtube_url, output_path)
             
-            # FFmpeg yolunu otomatik bul veya manuel belirt
+            # Automatically find FFmpeg path or specify manually
             ffmpeg_path = self.find_ffmpeg_path()
             if not ffmpeg_path:
-                print("FFmpeg bulunamadı! Manuel yol belirtiliyor...")
-                ffmpeg_path = "C:\\ffmpeg\\bin"  # Manuel yol
+                print("FFmpeg not found! Specifying manual path...")
+                ffmpeg_path = "C:\\ffmpeg\\bin"  # Manual path
             
-            # Tam dosya yolunu al
+            # Get full file path
             abs_output_path = os.path.abspath(output_path)
             
             ydl_opts = {
@@ -118,37 +118,37 @@ class YouTubeToText:
                     'preferredcodec': 'wav',
                     'preferredquality': '192',
                 }],
-                'ffmpeg_location': ffmpeg_path,  # FFmpeg yolunu belirt
+                'ffmpeg_location': ffmpeg_path,  # Specify FFmpeg path
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([youtube_url])
             
-            # Dosyanın gerçekten oluştuğunu kontrol et
+            # Check if file was actually created
             if os.path.exists(abs_output_path):
-                print(f"✅ Ses dosyası oluşturuldu: {abs_output_path}")
+                print(f"✅ Audio file created: {abs_output_path}")
                 return abs_output_path
             else:
-                print(f"❌ Ses dosyası oluşturulamadı: {abs_output_path}")
-                # Alternatif dosya adlarını kontrol et
+                print(f"❌ Audio file could not be created: {abs_output_path}")
+                # Check alternative file names
                 for possible_ext in ['.wav', '.webm', '.m4a', '.mp3']:
                     possible_file = abs_output_path.replace('.wav', possible_ext)
                     if os.path.exists(possible_file):
-                        print(f"✅ Alternatif dosya bulundu: {possible_file}")
+                        print(f"✅ Alternative file found: {possible_file}")
                         return possible_file
                 return None
         except Exception as e:
-            print(f"Ses indirme hatası: {e}")
+            print(f"Audio download error: {e}")
             return self.download_audio_alternative(youtube_url, output_path)
 
     def download_audio_alternative(self, youtube_url, output_path="temp_audio"):
-        """FFmpeg olmadan ses indirme alternatifi"""
+        """Alternative audio download without FFmpeg"""
         try:
-            print("🔄 Alternatif indirme yöntemi deneniyor...")
+            print("🔄 Trying alternative download method...")
             
             abs_output_path = os.path.abspath(output_path)
             
-            # Sadece ses dosyasını indir, dönüştürme yapma
+            # Download only audio file, no conversion
             ydl_opts = {
                 'format': 'bestaudio[ext=m4a]/bestaudio',
                 'outtmpl': abs_output_path + '.%(ext)s',
@@ -159,181 +159,181 @@ class YouTubeToText:
                 info = ydl.extract_info(youtube_url, download=False)
                 ydl.download([youtube_url])
                 
-                # İndirilen dosyanın uzantısını bul
+                # Find the extension of downloaded file
                 ext = ydl.prepare_filename(info).split('.')[-1]
                 downloaded_file = f"{abs_output_path}.{ext}"
                 
                 if os.path.exists(downloaded_file):
-                    print(f"✅ Ham ses dosyası indirildi: {downloaded_file}")
+                    print(f"✅ Raw audio file downloaded: {downloaded_file}")
                     return downloaded_file
                     
             return None
         except Exception as e:
-            print(f"Alternatif indirme hatası: {e}")
+            print(f"Alternative download error: {e}")
             return None
     
     def audio_to_text_whisper(self, audio_path, language='en'):
-        """Whisper kullanarak ses dosyasını metne dönüştür (önerilen)"""
+        """Convert audio file to text using Whisper (recommended)"""
         try:
-            # Dosyanın varlığını kontrol et
+            # Check if file exists
             if not os.path.exists(audio_path):
-                print(f"❌ Ses dosyası bulunamadı: {audio_path}")
+                print(f"❌ Audio file not found: {audio_path}")
                 return None
             
-            print(f"🎵 Whisper ile işleniyor: {audio_path}")
-            print(f"📊 Dosya boyutu: {os.path.getsize(audio_path) / 1024 / 1024:.2f} MB")
-            print(f"🌍 Dil ayarı: {language}")
+            print(f"🎵 Processing with Whisper: {audio_path}")
+            print(f"📊 File size: {os.path.getsize(audio_path) / 1024 / 1024:.2f} MB")
+            print(f"🌍 Language setting: {language}")
             
-            # Whisper için FFmpeg yolunu environment'a ekle
+            # Add FFmpeg path to environment for Whisper
             ffmpeg_path = self.find_ffmpeg_path()
             if ffmpeg_path and ffmpeg_path not in os.environ.get('PATH', ''):
                 os.environ['PATH'] = ffmpeg_path + os.pathsep + os.environ.get('PATH', '')
             
-            # Whisper dil kodlarını ayarla
+            # Set Whisper language codes
             whisper_lang = language
             if language == 'tr':
                 whisper_lang = 'tr'
             elif language == 'en':
                 whisper_lang = 'en'
             
-            # Whisper'a verbose parametre ekleyerek hatayı daha iyi görelim
+            # Add verbose parameter to Whisper to see errors better
             result = self.whisper_model.transcribe(
                 audio_path, 
-                language=whisper_lang,  # Dinamik dil desteği
+                language=whisper_lang,  # Dynamic language support
                 verbose=True,
-                fp16=False  # Uyumluluk için
+                fp16=False  # For compatibility
             )
             
             return result["text"]
         except Exception as e:
-            print(f"Whisper dönüşüm hatası: {e}")
-            print("🔄 Google Speech Recognition deneniyor...")
+            print(f"Whisper conversion error: {e}")
+            print("🔄 Trying Google Speech Recognition...")
             return self.audio_to_text_google_fallback(audio_path, language)
     
     def audio_to_text_google_fallback(self, audio_path, language='en'):
-        """Whisper başarısız olursa Google Speech Recognition kullan"""
+        """Use Google Speech Recognition if Whisper fails"""
         try:
-            # Pydub ile ses dosyasını wav formatına dönüştür
+            # Convert audio file to wav format using Pydub
             if not audio_path.endswith('.wav'):
-                print("🔄 Ses dosyası WAV formatına dönüştürülüyor...")
+                print("🔄 Converting audio file to WAV format...")
                 audio = AudioSegment.from_file(audio_path)
                 wav_path = audio_path.rsplit('.', 1)[0] + '.wav'
                 audio.export(wav_path, format="wav")
                 audio_path = wav_path
-                print(f"✅ WAV dosyası oluşturuldu: {wav_path}")
+                print(f"✅ WAV file created: {wav_path}")
             
             return self.audio_to_text_google(audio_path, language)
         except Exception as e:
-            print(f"Fallback dönüşüm hatası: {e}")
+            print(f"Fallback conversion error: {e}")
             return None
     
     def audio_to_text_google(self, audio_path, language='en'):
-        """Google Speech Recognition ile ses dosyasını metne dönüştür"""
+        """Convert audio file to text using Google Speech Recognition"""
         try:
-            # Ses dosyasını yükle
+            # Load audio file
             audio = AudioSegment.from_wav(audio_path)
             
-            # Büyük dosyaları parçalara böl (60 saniye)
+            # Split large files into chunks (60 seconds)
             chunk_length_ms = 60000
             chunks = [audio[i:i+chunk_length_ms] for i in range(0, len(audio), chunk_length_ms)]
             
-            # Google Speech Recognition dil kodları
+            # Google Speech Recognition language codes
             google_lang = "en-US"
             if language == 'tr':
                 google_lang = "tr-TR"
             elif language == 'en':
                 google_lang = "en-US"
             
-            print(f"🌍 Google Speech dil ayarı: {google_lang}")
+            print(f"🌍 Google Speech language setting: {google_lang}")
             
             full_text = ""
             
             for i, chunk in enumerate(chunks):
-                # Geçici dosya oluştur
+                # Create temporary file
                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
                     chunk.export(temp_file.name, format="wav")
                     
-                    # Ses dosyasını yükle
+                    # Load audio file
                     with sr.AudioFile(temp_file.name) as source:
                         audio_data = self.recognizer.record(source)
                     
                     try:
-                        # Dinamik dil desteği ile metne dönüştür
+                        # Convert to text with dynamic language support
                         text = self.recognizer.recognize_google(audio_data, language=google_lang)
                         full_text += text + " "
-                        print(f"Parça {i+1} işlendi: {text[:50]}...")
+                        print(f"Chunk {i+1} processed: {text[:50]}...")
                     except sr.UnknownValueError:
-                        print(f"Parça {i+1} anlaşılamadı")
+                        print(f"Chunk {i+1} could not be understood")
                     except sr.RequestError as e:
-                        print(f"Google API hatası: {e}")
+                        print(f"Google API error: {e}")
                     
-                    # Geçici dosyayı sil
+                    # Delete temporary file
                     os.unlink(temp_file.name)
             
             return full_text.strip()
             
         except Exception as e:
-            print(f"Google Speech Recognition hatası: {e}")
+            print(f"Google Speech Recognition error: {e}")
             return None
     
     def process_youtube_video(self, youtube_url, method="whisper", language='en'):
-        """YouTube videosunu işleyip metne dönüştür"""
-        print(f"İşleniyor: {youtube_url}")
-        print(f"🌍 Dil: {language}")
+        """Process YouTube video and convert to text"""
+        print(f"Processing: {youtube_url}")
+        print(f"🌍 Language: {language}")
         
-        # Ses dosyasını indir
+        # Download audio file
         audio_path = self.download_audio(youtube_url)
         if not audio_path:
             return None
         
-        # Metne dönüştür
+        # Convert to text
         if method == "whisper":
             text = self.audio_to_text_whisper(audio_path, language)
         else:
             text = self.audio_to_text_google_fallback(audio_path, language)
         
-        # Geçici dosyaları temizle
+        # Clean up temporary files
         self.cleanup_temp_files(audio_path)
         
         return text
     
     def cleanup_temp_files(self, audio_path):
-        """Geçici dosyaları temizle"""
+        """Clean up temporary files"""
         try:
             if audio_path and os.path.exists(audio_path):
                 os.remove(audio_path)
-                print(f"🗑️ Geçici dosya silindi: {audio_path}")
+                print(f"🗑️ Temporary file deleted: {audio_path}")
             
-            # Diğer olası uzantıları da temizle
+            # Clean up other possible extensions
             base_path = audio_path.rsplit('.', 1)[0] if audio_path else "temp_audio"
             for ext in ['.webm', '.m4a', '.mp3', '.wav']:
                 temp_file = base_path + ext
                 if os.path.exists(temp_file):
                     os.remove(temp_file)
-                    print(f"🗑️ Dosya silindi: {temp_file}")
+                    print(f"🗑️ File deleted: {temp_file}")
         except Exception as e:
-            print(f"⚠️ Dosya silme hatası: {e}")
+            print(f"⚠️ File deletion error: {e}")
     
     def save_text_to_file(self, text, filename="transcript.txt"):
-        """Metni dosyaya kaydet"""
+        """Save text to file"""
         try:
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(text)
-            print(f"💾 Metin kaydedildi: {filename}")
+            print(f"💾 Text saved: {filename}")
         except Exception as e:
-            print(f"Dosya kaydetme hatası: {e}")
+            print(f"File saving error: {e}")
     
     # =============================================================================
-    # RAG SİSTEMİ FONKSİYONLARI
+    # RAG SYSTEM FUNCTIONS
     # =============================================================================
     
     def _setup_rag_system(self):
-        """RAG sistemini başlat"""
+        """Initialize RAG system"""
         
         try:
-            # Çok dilli embedding modeli
-            print(f"🔧 RAG sistemi başlatılıyor...")
-            print(f"📚 Embedding modeli: {self.embedding_model_name}")
+            # Multilingual embedding model
+            print(f"🔧 Initializing RAG system...")
+            print(f"📚 Embedding model: {self.embedding_model_name}")
             
             self.embeddings = HuggingFaceEmbeddings(
                 model_name=self.embedding_model_name,
@@ -352,36 +352,36 @@ class YouTubeToText:
             # LLM (Ollama)
             try:
                 self.llm = ChatOllama(
-                    model="phi4:latest",  # Varsayılan model
+                    model="phi4:latest",  # Default model
                     temperature=0.1,
                     num_ctx=4096,
                     num_predict=512,
                     verbose=False
                 )
-                print("✅ RAG sistemi hazır!")
+                print("✅ RAG system ready!")
             except Exception as e:
-                print(f"⚠️ LLM yüklenemedi: {e}")
-                print("💡 Ollama kurulu değil - sadece benzerlik araması kullanılabilir")
+                print(f"⚠️ LLM could not be loaded: {e}")
+                print("💡 Ollama not installed - only similarity search available")
                 self.llm = None
                 
         except Exception as e:
-            print(f"❌ RAG sistem hatası: {e}")
+            print(f"❌ RAG system error: {e}")
             self.enable_rag = False
     
     def create_rag_from_transcript(self, transcript: str, metadata: Dict = None) -> bool:
-        """Transkriptten RAG sistemi oluştur"""
+        """Create RAG system from transcript"""
         if not self.enable_rag:
-            print("❌ RAG sistemi aktif değil")
+            print("❌ RAG system not active")
             return False
         
         try:
-            print("🔧 RAG vector store oluşturuluyor...")
+            print("🔧 Creating RAG vector store...")
             
-            # Metni parçalara böl
+            # Split text into chunks
             chunks = self.text_splitter.split_text(transcript)
-            print(f"📝 Metin {len(chunks)} parçaya bölündü")
+            print(f"📝 Text split into {len(chunks)} chunks")
             
-            # Document objelerini oluştur
+            # Create document objects
             documents = []
             for i, chunk in enumerate(chunks):
                 doc_metadata = {
@@ -397,21 +397,21 @@ class YouTubeToText:
                     metadata=doc_metadata
                 ))
             
-            # FAISS vector store oluştur
+            # Create FAISS vector store
             self.vector_store = FAISS.from_documents(documents, self.embeddings)
             self.last_transcript = transcript
             
-            print("✅ RAG vector store oluşturuldu!")
+            print("✅ RAG vector store created!")
             return True
             
         except Exception as e:
-            print(f"❌ RAG oluşturma hatası: {e}")
+            print(f"❌ RAG creation error: {e}")
             return False
     
     def setup_qa_system(self):
-        """Soru-cevap sistemini kur"""
+        """Setup question-answer system"""
         if not self.enable_rag or not self.vector_store or not self.llm:
-            print("❌ QA sistemi kurulamıyor - gereksinimler karşılanmıyor")
+            print("❌ QA system cannot be setup - requirements not met")
             return False
         
         try:
@@ -435,7 +435,7 @@ Answer:"""
                 input_variables=["context", "question"]
             )
             
-            # RetrievalQA zinciri
+            # RetrievalQA chain
             self.qa_chain = RetrievalQA.from_chain_type(
                 llm=self.llm,
                 chain_type="stuff",
@@ -447,27 +447,27 @@ Answer:"""
                 return_source_documents=True
             )
             
-            print("✅ Soru-cevap sistemi hazır!")
+            print("✅ Question-answer system ready!")
             return True
             
         except Exception as e:
-            print(f"❌ QA sistem hatası: {e}")
+            print(f"❌ QA system error: {e}")
             return False
     
     def ask_question(self, question: str) -> Dict:
-        """Transkript hakkında soru sor"""
+        """Ask question about transcript"""
         if not self.enable_rag or not self.vector_store:
             return {
-                "error": "RAG sistemi aktif değil veya vector store yok",
+                "error": "RAG system not active or vector store missing",
                 "question": question,
                 "answer": None
             }
         
-        # QA sistemini kur (eğer kurulu değilse)
+        # Setup QA system (if not already setup)
         if not self.qa_chain:
             if not self.setup_qa_system():
                 return {
-                    "error": "QA sistemi kurulamadı",
+                    "error": "QA system could not be setup",
                     "question": question,
                     "answer": None
                 }
@@ -492,53 +492,53 @@ Answer:"""
             }
     
     def similarity_search(self, query: str, k: int = 3) -> List[Document]:
-        """Benzerlik araması yap"""
+        """Perform similarity search"""
         if not self.enable_rag or not self.vector_store:
-            print("❌ RAG sistemi aktif değil")
+            print("❌ RAG system not active")
             return []
         
         try:
             results = self.vector_store.similarity_search(query, k=k)
             
-            print(f"🔍 '{query}' için {len(results)} sonuç bulundu:")
+            print(f"🔍 {len(results)} results found for '{query}':")
             for i, doc in enumerate(results, 1):
                 print(f"{i}. {doc.page_content[:100]}...")
             
             return results
             
         except Exception as e:
-            print(f"❌ Benzerlik arama hatası: {e}")
+            print(f"❌ Similarity search error: {e}")
             return []
     
     def save_rag_system(self, path: str = "./vector_store"):
-        """RAG sistemini kaydet"""
+        """Save RAG system"""
         if not self.enable_rag or not self.vector_store:
-            print("❌ Kaydedilecek RAG sistemi yok")
+            print("❌ No RAG system to save")
             return False
         
         try:
             os.makedirs(path, exist_ok=True)
             self.vector_store.save_local(path)
             
-            # Transcript'i de kaydet
+            # Also save transcript
             with open(os.path.join(path, "transcript.txt"), "w", encoding="utf-8") as f:
                 f.write(self.last_transcript or "")
             
-            print(f"💾 RAG sistemi kaydedildi: {path}")
+            print(f"💾 RAG system saved: {path}")
             return True
             
         except Exception as e:
-            print(f"❌ RAG kaydetme hatası: {e}")
+            print(f"❌ RAG saving error: {e}")
             return False
     
     def load_rag_system(self, path: str = "./vector_store") -> bool:
-        """RAG sistemini yükle"""
+        """Load RAG system"""
         if not self.enable_rag:
-            print("❌ RAG sistemi aktif değil")
+            print("❌ RAG system not active")
             return False
         
         if not os.path.exists(path):
-            print(f"❌ RAG sistemi bulunamadı: {path}")
+            print(f"❌ RAG system not found: {path}")
             return False
         
         try:
@@ -548,28 +548,28 @@ Answer:"""
                 allow_dangerous_deserialization=True
             )
             
-            # Transcript'i de yükle
+            # Also load transcript
             transcript_path = os.path.join(path, "transcript.txt")
             if os.path.exists(transcript_path):
                 with open(transcript_path, "r", encoding="utf-8") as f:
                     self.last_transcript = f.read()
             
-            print(f"✅ RAG sistemi yüklendi: {path}")
+            print(f"✅ RAG system loaded: {path}")
             return True
             
         except Exception as e:
-            print(f"❌ RAG yükleme hatası: {e}")
+            print(f"❌ RAG loading error: {e}")
             return False
     
     def process_with_rag(self, youtube_url: str, method: str = "whisper", language: str = 'en') -> Dict:
-        """YouTube videosunu işleyip RAG sistemi ile analiz et"""
+        """Process YouTube video and analyze with RAG system"""
         
-        # 1. Normal transkript al
-        print(f"🎬 YouTube videosu işleniyor: {youtube_url}")
+        # 1. Get normal transcript
+        print(f"🎬 Processing YouTube video: {youtube_url}")
         transcript = self.process_youtube_video(youtube_url, method=method, language=language)
         
         if not transcript:
-            return {"error": "Transkript alınamadı", "transcript": None, "rag_ready": False}
+            return {"error": "Transcript could not be obtained", "transcript": None, "rag_ready": False}
         
         result = {
             "transcript": transcript,
@@ -577,7 +577,7 @@ Answer:"""
             "error": None
         }
         
-        # 2. RAG sistemi oluştur
+        # 2. Create RAG system
         if self.enable_rag:
             metadata = {
                 "source": "youtube",
@@ -592,65 +592,65 @@ Answer:"""
         return result
 
 def main():
-    """Ana RAG sistemi"""
-    print("🚀 YouTube RAG Sistemi")
+    """Main RAG system"""
+    print("🚀 YouTube RAG System")
     
-    # YouTube URL'si (buraya istediğiniz URL'yi girin)
+    # YouTube URL (enter your desired URL here)
     video_url = "https://www.youtube.com/watch?v=Ht2QW5PV-eY"
-    print(f"📺 İşlenecek video: {video_url}")
+    print(f"📺 Video to process: {video_url}")
     
-    # RAG sistemi ile başlat
+    # Start with RAG system
     converter = YouTubeToText(
         enable_rag=True,
         embedding_model="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     )
     
-    # Video işle ve RAG sistemi oluştur
+    # Process video and create RAG system
     print("\n" + "="*60)
     result = converter.process_with_rag(video_url, method="whisper")
     
     if not result["transcript"]:
-        print("❌ Transkript alınamadı!")
+        print("❌ Transcript could not be obtained!")
         return
     
     if not result["rag_ready"]:
-        print("❌ RAG sistemi oluşturulamadı!")
+        print("❌ RAG system could not be created!")
         return
     
     print("\n" + "="*60)
-    print("📝 TRANSKRIPT:")
+    print("📝 TRANSCRIPT:")
     print("="*60)
     print(result["transcript"])
     
-    # RAG sistemini kaydet
+    # Save RAG system
     converter.save_rag_system("./rag_data")
     
-    # Soru-cevap döngüsü
+    # Question-answer loop
     print("\n" + "="*60)
-    print("💬 SORU-CEVAP SİSTEMİ (quit ile çık)")
+    print("💬 QUESTION-ANSWER SYSTEM (quit to exit)")
     print("="*60)
-    print("Video hakkında sorularınızı sorun...")
+    print("Ask your questions about the video...")
     
     while True:
         try:
-            question = input("\n❓ Sorunuz: ").strip()
+            question = input("\n❓ Your question: ").strip()
             
-            if question.lower() in ['quit', 'çık', 'exit', 'q']:
-                print("👋 Görüşürüz!")
+            if question.lower() in ['quit', 'exit', 'q']:
+                print("👋 Goodbye!")
                 break
             
             if not question:
                 continue
             
-            # Soru-cevap
+            # Question-answer
             answer = converter.ask_question(question)
             if not answer.get("error"):
-                print(f"\n💬 Cevap: {answer['answer']}")
+                print(f"\n💬 Answer: {answer['answer']}")
             else:
-                print(f"\n❌ Hata: {answer['error']}")
+                print(f"\n❌ Error: {answer['error']}")
                 
         except KeyboardInterrupt:
-            print("\n👋 Görüşürüz!")
+            print("\n👋 Goodbye!")
             break
 
 if __name__ == "__main__":
