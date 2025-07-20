@@ -108,8 +108,6 @@ https://github.com/user-attachments/assets/6cd0071c-0ffb-4779-9677-04b1101539f2
 ### 💬 Example Questions for Chatbot
 - "What is the main topic of this video?"
 - "Can you summarize the key points?"
-- "What does the speaker say about [specific topic]?"
-- "How long does the speaker talk about [subject]?"
 
 ## 🏗️ Components
 
