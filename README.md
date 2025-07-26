@@ -6,7 +6,7 @@ SubtitleAI is an advanced tool that processes YouTube and TikTok videos to gener
 
 <img width="1920" height="2440" alt="gradio" src="https://github.com/user-attachments/assets/44411fcc-ea37-4206-ac7b-a03ed75d13f0" />
 
-
+🎬 Process Video\n(AI Descriptions + TTS)
 https://github.com/user-attachments/assets/6cd0071c-0ffb-4779-9677-04b1101539f2
 
 **Note: The project is currently under active development and will be further enhanced with new features over time.**
