@@ -11,6 +11,7 @@ from describe import (
 from subtitle import create_subtitled_video
 from tts import create_video_with_tts
 from video_chat import YouTubeToText
+from srt_subtitle import process_video_with_srt
 
 # Supported languages
 LANGUAGES = {
@@ -242,6 +243,67 @@ def clear_chat():
     """Clear chat history"""
     return []
 
+def process_srt_subtitles(video_input, youtube_url, tiktok_url, selected_lang, font_size, font_color, text_position, font_family):
+    """SRT altyazı ile video işle - Whisper kullanarak"""
+    try:
+        # 1. Video URL'sini belirle - Öncelik: TikTok > YouTube > Upload
+        video_url = None
+        if tiktok_url and tiktok_url.strip():
+            video_url = tiktok_url.strip()
+        elif youtube_url and youtube_url.strip():
+            video_url = youtube_url.strip()
+        elif isinstance(video_input, str) and (video_input.startswith(('http://', 'https://'))):
+            video_url = video_input
+        
+        if not video_url:
+            return None, "❌ SRT altyazı oluşturma için video URL'si gerekli (YouTube veya TikTok). Lütfen geçerli bir URL girin."
+        
+        # 2. Dil kodunu çevir
+        lang_code = LANGUAGES[selected_lang]
+        
+        # 3. Altyazı ayarlarını hazırla
+        subtitle_config = {
+            'font_size': font_size,
+            'font_color': SUBTITLE_COLORS[font_color],
+            'text_position': text_position,
+            'font_family': SUBTITLE_FONTS[font_family]
+        }
+        
+        print(f"🎬 SRT Altyazı işlemi başlıyor...")
+        print(f"📹 URL: {video_url}")
+        print(f"🌍 Dil: {selected_lang} ({lang_code})")
+        print(f"🎨 Altyazı ayarları: {subtitle_config}")
+        
+        # 4. SRT ile video işle
+        success, output_video_path, srt_path, error_message = process_video_with_srt(
+            video_url=video_url,
+            subtitle_config=subtitle_config,
+            language=lang_code
+        )
+        
+        if success:
+            # Başarı mesajı oluştur
+            success_msg = f"✅ SRT Altyazılı video başarıyla oluşturuldu!\n\n"
+            success_msg += f"📹 Video: {os.path.basename(output_video_path)}\n"
+            success_msg += f"📄 SRT dosyası: {os.path.basename(srt_path) if srt_path else 'N/A'}\n"
+            success_msg += f"🌍 Dil: {selected_lang}\n"
+            success_msg += f"🎨 Font boyutu: {font_size}, Renk: {font_color}, Pozisyon: {text_position}"
+            
+            return output_video_path, success_msg
+        else:
+            error_msg = f"❌ SRT altyazı oluşturma başarısız!\n\n"
+            if error_message:
+                error_msg += f"Hata: {error_message}\n\n"
+            if srt_path:
+                error_msg += f"📄 SRT dosyası oluşturuldu: {os.path.basename(srt_path)}\n"
+                error_msg += "💡 SRT dosyasını video oynatıcınıza manuel olarak yükleyebilirsiniz."
+            
+            return None, error_msg
+            
+    except Exception as e:
+        error_msg = f"❌ SRT işlemi sırasında beklenmeyen hata: {str(e)}"
+        return None, error_msg
+
 # Gradio interface
 def create_interface():
     # RAG sistemini başlat
@@ -331,11 +393,18 @@ def create_interface():
                 # Action buttons
                 with gr.Group(elem_classes="button-section"):
                     gr.Markdown("### 🚀 Choose Action")
-                    gr.Markdown("*Use the same video input above for both options*")
+                    gr.Markdown("*Use the same video input above for all options*")
                     
                     with gr.Row():
                         process_btn = gr.Button(
-                            "🎬 Process Video\n(Create Subtitles)", 
+                            "🎬 Process Video\n(AI Descriptions + TTS)", 
+                            variant="primary", 
+                            size="lg",
+                            scale=1
+                        )
+                        
+                        srt_btn = gr.Button(
+                            "📝 Generate SRT Subtitles\n(Whisper Transcription)", 
                             variant="primary", 
                             size="lg",
                             scale=1
@@ -425,6 +494,25 @@ def create_interface():
             ]
         )
         
+        # SRT subtitle button click event
+        srt_btn.click(
+            fn=process_srt_subtitles,
+            inputs=[
+                video_input, 
+                youtube_url,
+                tiktok_url,
+                language,
+                font_size,
+                font_color,
+                text_position,
+                font_family
+            ],
+            outputs=[
+                output_video, 
+                summary_text
+            ]
+        )
+        
         # Chat events
         ask_btn.click(
             fn=ask_question_about_video,
@@ -449,27 +537,37 @@ def create_interface():
         
         #### 📹 Step 1 - Video Input:
         - **Upload a video file** OR **Enter YouTube/TikTok URL**
-        - **Select language** for descriptions and voice
-        - **Customize subtitle settings** (for video processing only)
+        - **Select language** for transcription and descriptions
+        - **Customize subtitle settings** (font, color, position)
         
         #### 🚀 Step 2 - Choose Action:
-        - **🎬 Process Video**: Creates subtitled video with TTS
+        - **🎬 Process Video**: Creates AI-described subtitled video with TTS
+        - **📝 Generate SRT Subtitles**: Creates accurate Whisper-based subtitles with custom styling
         - **🤖 Setup Chatbot Only**: Quick chatbot setup without video processing
         
         #### 💬 Step 3 - Video Chat:
-        - After either action, **chatbot becomes active**
+        - After video processing or chatbot setup, **chatbot becomes active**
         - **Ask questions** about the video content
         - **AI analyzes video audio** and provides intelligent answers
         
         #### ⚠️ Important Notes:
-        - **Chatbot requires URLs** (YouTube/TikTok) - not uploaded files
+        - **SRT subtitles and chatbot require URLs** (YouTube/TikTok) - not uploaded files
         - **TikTok videos** optimized for short content analysis
-        - **Video processing** includes subtitles + TTS + chatbot
-        - **Chatbot only** is faster for quick Q&A
+        - **AI Processing** includes descriptions + TTS + chatbot
+        - **SRT Generation** uses Whisper for accurate transcription with dynamic styling
+        - **Chatbot only** is fastest for quick Q&A
+        
+        #### 🎨 SRT Subtitle Features:
+        - **Dynamic Font Size**: 20-80 pixels from slider
+        - **Custom Colors**: Yellow, White, Red, Green, Blue, Orange, Pink
+        - **Font Selection**: Uses TTF fonts from fonts folder
+        - **Position Control**: Bottom, Top, Middle placement
+        - **Multi-language**: Supports Turkish, English transcription
         
         #### 🔧 Requirements:
-        - **Ollama** with `phi4:latest` and `gemma3:4b` models
-        - **FFmpeg** for audio processing
+        - **Ollama** with `phi4:latest` and `gemma3:4b` models (for AI processing)
+        - **Whisper** for SRT subtitle generation
+        - **FFmpeg** for audio/video processing
         - **Internet connection** for URL-based videos
         """, elem_classes="main-container")
     

@@ -22,6 +22,12 @@ https://github.com/user-attachments/assets/6cd0071c-0ffb-4779-9677-04b1101539f2
 - **Text-to-Speech**: Generate narrated videos using TTS models for English and Turkish
 - **Summary Generation**: Provide comprehensive video summaries in selected language
 
+### 📝 SRT Subtitle Generation (NEW!)
+- **Whisper Transcription**: Accurate speech-to-text conversion using OpenAI Whisper
+- **Custom Styling**: Dynamic font size, colors, and position control
+- **Multi-language Support**: Generate subtitles in Turkish, English, and other languages
+- **SRT File Export**: Standard SRT format compatible with all video players
+
 ### 🤖 Video Chatbot (NEW!)
 - **RAG-based Q&A**: Ask questions about video content using advanced RAG system
 - **Audio-to-Text**: Convert video audio to text using Whisper or Google Speech Recognition
@@ -104,6 +110,20 @@ https://github.com/user-attachments/assets/6cd0071c-0ffb-4779-9677-04b1101539f2
    - Chat interface becomes active
    - Ask questions about video content
    - Get intelligent AI responses
+
+### 📝 SRT Subtitle Generation Mode
+
+1. **Input Video URL:**
+   - Enter YouTube or TikTok URL
+
+2. **Configure Subtitle Settings:**
+   - Select transcription language (Turkish/English)
+   - Choose font size, color, and position
+
+3. **Generate SRT Subtitles:**
+   - Click "📝 Generate SRT Subtitles" button
+   - Wait for Whisper transcription
+   - Get subtitled video + SRT file
 
 ### 💬 Example Questions for Chatbot
 - "What is the main topic of this video?"
