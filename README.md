@@ -149,6 +149,8 @@ https://github.com/user-attachments/assets/05ace402-3c33-497b-9b51-ab899c1de16d
 - **subtitle.py**: Subtitle creation and video rendering
 - **tts.py**: Text-to-speech audio generation
 - **video_chat.py**: RAG-based chatbot system with audio-to-text conversion
+- **srt_subtitle.py**: SRT subtitle generation with Whisper transcription
+
 
 ## 🤖 Models & Technologies Used
 
