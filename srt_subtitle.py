@@ -7,6 +7,162 @@ import subprocess
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import textwrap
+import re
+from datetime import datetime, timedelta
+import random
+
+class AdvancedSubtitleProcessor:
+    """Gelişmiş altyazı işleme sınıfı - ffmeg_stil_font2.py'den uyarlandı"""
+    
+    def __init__(self):
+        self.user_preferences = {}
+        self.colors = {
+            'Yellow': '#FFFF00',
+            'White': '#FFFFFF', 
+            'Red': '#FF0000',
+            'Blue': '#0080FF',
+            'Green': '#00FF00',
+            'Purple': '#FF00FF',
+            'Orange': '#FF8000',
+            'Pink': '#FF80C0',
+            'Gold': '#FFD700',
+            'Silver': '#C0C0C0',
+            'Neon Green': '#39FF14',
+            'Neon Blue': '#1B03A3',
+            'Turquoise': '#40E0D0',
+            'Lavender': '#E6E6FA',
+            'Lime': '#32CD32'
+        }
+        
+        self.effects = {
+            'fade': 'Yumuşak Geçiş',
+            'slide_up': 'Kaydırma Yukarı',
+            'slide_down': 'Kaydırma Aşağı', 
+            'slide_left': 'Kaydırma Sol',
+            'slide_right': 'Kaydırma Sağ',
+            'zoom': 'Zoom In/Out',
+            'zoom_in': 'Zoom In',
+            'zoom_out': 'Zoom Out',
+            'glow': 'Parlama',
+            'shake': 'Titreşim',
+            'rotate_cw': 'Döndürme Saat Yönü',
+            'rotate_ccw': 'Döndürme Ters Yön', 
+            'wave': 'Dalgalanma',
+            'pulse': 'Nabız',
+            'flip': 'Yansıma',
+            'spiral': 'Spiral',
+            'elastic': 'Elastik',
+            'bounce': 'Sıçrama',
+            'mixed': 'Karışık (Rastgele)',
+            'none': 'Efektsiz'
+        }
+        
+        self.positions = {
+            'bottom': 'Alt Orta',
+            'bottom_left': 'Alt Sol',
+            'bottom_right': 'Alt Sağ',
+            'middle': 'Orta',
+            'top': 'Üst Orta',
+            'top_left': 'Üst Sol',
+            'top_right': 'Üst Sağ'
+        }
+    
+    def set_preferences_from_gradio(self, font_size, font_color, text_position, font_family, 
+                                   effect_type='fade', outline_size=3, shadow_size=2, opacity=1.0):
+        """Gradio arayüzünden gelen ayarları işle"""
+        self.user_preferences = {
+            'color': {'name': font_color, 'hex': font_color if font_color.startswith('#') else self.colors.get(font_color, '#FFFF00')},
+            'effect': {'name': self.effects.get(effect_type, 'Yumuşak Geçiş'), 'code': effect_type},
+            'position': {'name': self.positions.get(text_position, 'Alt Orta'), 'alignment': text_position},
+            'font_size': font_size,
+            'font_name': font_family or 'Arial Black',
+            'outline': {'name': f'Kalın ({outline_size}px)', 'value': str(outline_size)},
+            'shadow': {'name': f'Gölge ({shadow_size}px)', 'value': str(shadow_size)},
+            'opacity': {'name': f'Şeffaflık ({opacity})', 'value': opacity}
+        }
+        
+        print(f"✅ Gelişmiş altyazı ayarları uygulandı:")
+        print(f"   Renk: {self.user_preferences['color']['name']}")
+        print(f"   Efekt: {self.user_preferences['effect']['name']}")
+        print(f"   Konum: {self.user_preferences['position']['name']}")
+        print(f"   Font: {self.user_preferences['font_name']} ({font_size}px)")
+        print(f"   Çerçeve: {outline_size}px, Gölge: {shadow_size}px")
+    
+    def get_enhanced_text_properties(self):
+        """Gelişmiş metin özelliklerini döndür"""
+        if not self.user_preferences:
+            return {
+                'color': '#FFFF00',
+                'font_size': 28,
+                'font_name': 'Arial Black',
+                'outline_size': 3,
+                'shadow_size': 2,
+                'position': 'bottom',
+                'effect': 'fade',
+                'opacity': 1.0
+            }
+        
+        color_hex = self.user_preferences['color']['hex']
+        if not color_hex.startswith('#'):
+            color_hex = self.colors.get(color_hex, '#FFFF00')
+        
+        return {
+            'color': color_hex,
+            'font_size': self.user_preferences['font_size'],
+            'font_name': self.user_preferences['font_name'],
+            'outline_size': int(self.user_preferences['outline']['value']),
+            'shadow_size': int(self.user_preferences['shadow']['value']),
+            'position': self.user_preferences['position']['alignment'],
+            'effect': self.user_preferences['effect']['code'],
+            'opacity': float(self.user_preferences['opacity']['value'])
+        }
+    
+    def apply_text_effects(self, text, time_position=0.0):
+        """Metne zaman bazlı efektler uygula"""
+        if not self.user_preferences:
+            return text, {}
+        
+        effect_type = self.user_preferences['effect']['code']
+        effect_params = {}
+        
+        # Efekt parametrelerini hesapla
+        if effect_type == 'fade':
+            effect_params['alpha'] = min(time_position * 3, 1.0)
+        elif effect_type == 'slide_up':
+            effect_params['offset_y'] = int(20 * (1 - min(time_position * 2, 1)))
+        elif effect_type == 'slide_down':
+            effect_params['offset_y'] = int(-20 * (1 - min(time_position * 2, 1)))
+        elif effect_type == 'slide_left':
+            effect_params['offset_x'] = int(30 * (1 - min(time_position * 2, 1)))
+        elif effect_type == 'slide_right':
+            effect_params['offset_x'] = int(-30 * (1 - min(time_position * 2, 1)))
+        elif effect_type in ['zoom', 'zoom_in']:
+            effect_params['scale'] = 0.8 + 0.2 * min(time_position * 2, 1)
+        elif effect_type == 'zoom_out':
+            effect_params['scale'] = 1.2 - 0.2 * min(time_position * 2, 1)
+        elif effect_type == 'pulse':
+            pulse_factor = 1 + 0.1 * abs(np.sin(time_position * 6))
+            effect_params['scale'] = pulse_factor
+        elif effect_type == 'wave':
+            wave_factor = 0.05 * np.sin(time_position * 8)
+            effect_params['wave_offset'] = int(wave_factor * 10)
+        elif effect_type == 'shake':
+            if time_position < 0.5:
+                shake_x = random.randint(-2, 2)
+                shake_y = random.randint(-2, 2)
+                effect_params['offset_x'] = shake_x
+                effect_params['offset_y'] = shake_y
+        elif effect_type == 'rotate_cw':
+            effect_params['rotation'] = time_position * 360
+        elif effect_type == 'rotate_ccw':
+            effect_params['rotation'] = -time_position * 360
+        elif effect_type == 'mixed':
+            # Karışık efektler
+            effect_params['alpha'] = min(time_position * 2, 1.0)
+            effect_params['scale'] = 1 + 0.05 * np.sin(time_position * 4)
+            effect_params['offset_y'] = int(5 * np.sin(time_position * 3))
+        
+        return text, effect_params
 
 def detect_platform(url):
     """Detect platform type from URL"""
@@ -190,9 +346,9 @@ def seconds_to_srt_time(seconds):
     
     return f"{hours:02d}:{minutes:02d}:{secs:02d},{millisecs:03d}"
 
-def add_subtitles_to_video(video_path, srt_path, output_path, subtitle_config=None):
-    """Save video with subtitles using FFmpeg"""
-    print("Adding subtitles to video...")
+def add_subtitles_to_video(video_path, srt_path, output_path, subtitle_config=None, advanced_processor=None):
+    """Save video with subtitles using enhanced PIL method"""
+    print("Adding enhanced subtitles to video...")
     
     # Check file paths
     if not os.path.exists(video_path):
@@ -223,15 +379,18 @@ def add_subtitles_to_video(video_path, srt_path, output_path, subtitle_config=No
     
     print(f"🎨 Subtitle settings: {subtitle_config}")
     
-    # Try PIL method
-    print("🎨 PIL-based subtitle creation")
-    pil_success = create_subtitled_video_pil(video_path, srt_path, output_path, subtitle_config)
+    if advanced_processor:
+        print(f"✨ Enhanced subtitle processor enabled")
+    
+    # Try enhanced PIL method
+    print("🎨 Enhanced PIL-based subtitle creation")
+    pil_success = create_subtitled_video_pil(video_path, srt_path, output_path, subtitle_config, advanced_processor)
     
     if pil_success:
-        print("✅ PIL method successful!")
+        print("✅ Enhanced PIL method successful!")
         return True
     
-    print("⚠️ PIL method failed, switching to FFmpeg methods...")
+    print("⚠️ Enhanced PIL method failed, switching to FFmpeg fallback...")
     
     # FFmpeg backup method
     try:
@@ -248,7 +407,7 @@ def add_subtitles_to_video(video_path, srt_path, output_path, subtitle_config=No
         
         # Check if output file was created
         if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-            print(f"✅ Subtitled video created (FFmpeg): {output_path}")
+            print(f"✅ Subtitled video created (FFmpeg fallback): {output_path}")
             return True
         else:
             print("❌ FFmpeg did not create file")
@@ -320,16 +479,48 @@ def srt_time_to_seconds(time_str):
     total_seconds = h * 3600 + m * 60 + s + ms / 1000.0
     return total_seconds
 
-def create_text_frame(text, frame_size, config):
-    """Create subtitle frame with PIL"""
+def create_enhanced_text_frame(text, frame_size, config, advanced_processor=None, time_position=0.0):
+    """Create enhanced subtitle frame with PIL - Gelişmiş efektlerle"""
     img = Image.new('RGBA', frame_size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
+    # Gelişmiş ayarları al
+    if advanced_processor and advanced_processor.user_preferences:
+        enhanced_props = advanced_processor.get_enhanced_text_properties()
+        font_size = enhanced_props['font_size']
+        font_color = enhanced_props['color']
+        outline_size = enhanced_props['outline_size']
+        shadow_size = enhanced_props['shadow_size']
+        position = enhanced_props['position']
+        opacity = enhanced_props['opacity']
+        
+        # Efekt uygula
+        processed_text, effect_params = advanced_processor.apply_text_effects(text, time_position)
+    else:
+        # Varsayılan ayarlar
+        font_size = config.get('font_size', 28)
+        font_color = config.get('font_color', '#FFFF00')
+        outline_size = 3
+        shadow_size = 2
+        position = config.get('text_position', 'bottom')
+        opacity = 1.0
+        effect_params = {}
+    
+    # Font yükle
     try:
         if config.get('font_family') and config['font_family'] != 'Default':
-            font = ImageFont.truetype(config['font_family'], config['font_size'])
+            base_font_size = int(font_size * effect_params.get('scale', 1.0))
+            font = ImageFont.truetype(config['font_family'], base_font_size)
         else:
-            font = ImageFont.load_default()
+            # Varsayılan bold font dene
+            base_font_size = int(font_size * effect_params.get('scale', 1.0))
+            try:
+                font = ImageFont.truetype('arial.ttf', base_font_size)
+            except:
+                try:
+                    font = ImageFont.truetype('Arial.ttf', base_font_size)
+                except:
+                    font = ImageFont.load_default()
     except Exception as e:
         print(f"⚠️ Font loading failed: {e}, using default")
         font = ImageFont.load_default()
@@ -342,28 +533,105 @@ def create_text_frame(text, frame_size, config):
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
     
-    # Calculate text position
+    # Calculate base text position
     x = (frame_size[0] - text_width) // 2
-    if config['text_position'] == 'bottom':
+    if position in ['bottom', 'bottom_left', 'bottom_right']:
         y = frame_size[1] - text_height - 50
-    elif config['text_position'] == 'top':
+    elif position in ['top', 'top_left', 'top_right']:
         y = 50
     else:  # middle
         y = (frame_size[1] - text_height) // 2
     
-    # Draw colored text (use hex color)
-    draw.text(
-        (x, y), 
-        wrapped_text, 
-        font=font, 
-        fill=config['font_color']  # Hex color string (#FFFF00 etc.)
-    )
+    # Pozisyon ayarlamaları
+    if 'left' in position:
+        x = 50
+    elif 'right' in position:
+        x = frame_size[0] - text_width - 50
+    
+    # Efekt offset'lerini uygula
+    x += effect_params.get('offset_x', 0)
+    y += effect_params.get('offset_y', 0)
+    y += effect_params.get('wave_offset', 0)
+    
+    # Alpha hesapla
+    alpha_multiplier = effect_params.get('alpha', opacity)
+    
+    # Gölge çiz (eğer varsa)
+    if shadow_size > 0:
+        shadow_color = '#000000'
+        shadow_alpha = int(128 * alpha_multiplier)
+        for sx in range(-shadow_size, shadow_size + 1):
+            for sy in range(-shadow_size, shadow_size + 1):
+                if sx != 0 or sy != 0:
+                    try:
+                        draw.text(
+                            (x + sx, y + sy),
+                            wrapped_text,
+                            font=font,
+                            fill=shadow_color + f'{shadow_alpha:02x}'
+                        )
+                    except:
+                        draw.text(
+                            (x + sx, y + sy),
+                            wrapped_text,
+                            font=font,
+                            fill=shadow_color
+                        )
+    
+    # Çerçeve çiz (outline)
+    if outline_size > 0:
+        outline_color = '#000000'
+        outline_alpha = int(255 * alpha_multiplier)
+        for ox in range(-outline_size, outline_size + 1):
+            for oy in range(-outline_size, outline_size + 1):
+                if ox != 0 or oy != 0:
+                    try:
+                        draw.text(
+                            (x + ox, y + oy),
+                            wrapped_text,
+                            font=font,
+                            fill=outline_color + f'{outline_alpha:02x}'
+                        )
+                    except:
+                        draw.text(
+                            (x + ox, y + oy),
+                            wrapped_text,
+                            font=font,
+                            fill=outline_color
+                        )
+    
+    # Ana metni çiz
+    main_alpha = int(255 * alpha_multiplier)
+    try:
+        if len(font_color) == 7:  # #RRGGBB formatı
+            font_color_with_alpha = font_color + f'{main_alpha:02x}'
+        else:
+            font_color_with_alpha = font_color
+        
+        draw.text(
+            (x, y),
+            wrapped_text,
+            font=font,
+            fill=font_color_with_alpha
+        )
+    except:
+        # Alpha desteği yoksa normal renk kullan
+        draw.text(
+            (x, y),
+            wrapped_text,
+            font=font,
+            fill=font_color
+        )
     
     return np.array(img)
 
-def create_subtitled_video_pil(video_path, srt_path, output_path, subtitle_config):
-    """Create subtitled video with PIL"""
-    print("🎨 Creating subtitled video with PIL...")
+def create_text_frame(text, frame_size, config):
+    """Eski create_text_frame fonksiyonu - geriye uyumluluk için"""
+    return create_enhanced_text_frame(text, frame_size, config)
+
+def create_subtitled_video_pil(video_path, srt_path, output_path, subtitle_config, advanced_processor=None):
+    """Create subtitled video with PIL - Gelişmiş efektlerle"""
+    print("🎨 Creating enhanced subtitled video with PIL...")
     
     try:
         # Parse SRT file
@@ -379,22 +647,39 @@ def create_subtitled_video_pil(video_path, srt_path, output_path, subtitle_confi
         print(f"⏱️ Video duration: {video.duration:.2f} seconds")
         print(f"📝 Number of subtitles: {len(subtitles)}")
         
+        if advanced_processor and advanced_processor.user_preferences:
+            print(f"🎨 Enhanced subtitle effects enabled")
+            enhanced_props = advanced_processor.get_enhanced_text_properties()
+            print(f"   Color: {enhanced_props['color']}")
+            print(f"   Effect: {enhanced_props['effect']}")
+            print(f"   Font size: {enhanced_props['font_size']}")
+            print(f"   Position: {enhanced_props['position']}")
+        
         def make_frame(t):
             frame = video.get_frame(t)
             
             # Which subtitle is active at current time?
             current_subtitle = None
+            subtitle_start_time = None
             for subtitle in subtitles:
                 if subtitle['start'] <= t <= subtitle['end']:
                     current_subtitle = subtitle
+                    subtitle_start_time = subtitle['start']
                     break
             
             if current_subtitle:
-                # Create subtitle frame
-                text_frame = create_text_frame(
+                # Calculate time position within subtitle (0.0 to 1.0)
+                subtitle_duration = current_subtitle['end'] - subtitle_start_time
+                time_in_subtitle = t - subtitle_start_time
+                time_position = time_in_subtitle / subtitle_duration if subtitle_duration > 0 else 0
+                
+                # Create enhanced subtitle frame
+                text_frame = create_enhanced_text_frame(
                     current_subtitle['text'], 
                     frame_size,
-                    subtitle_config
+                    subtitle_config,
+                    advanced_processor,
+                    time_position
                 )
                 
                 # Alpha blending
@@ -420,7 +705,7 @@ def create_subtitled_video_pil(video_path, srt_path, output_path, subtitle_confi
             logger=None
         )
         
-        print(f"✅ PIL subtitled video saved: {output_path}")
+        print(f"✅ Enhanced PIL subtitled video saved: {output_path}")
         
         # Cleanup
         video.close()
@@ -429,7 +714,7 @@ def create_subtitled_video_pil(video_path, srt_path, output_path, subtitle_confi
         return True
         
     except Exception as e:
-        print(f"❌ PIL video creation error: {e}")
+        print(f"❌ Enhanced PIL video creation error: {e}")
         return False
 
 def create_safe_filename(original_name):
@@ -465,24 +750,41 @@ def create_safe_filename(original_name):
     
     return safe_name
 
-def process_video_with_srt(video_url, subtitle_config=None, language='tr'):
+def process_video_with_srt(video_url, subtitle_config=None, language='tr', advanced_config=None):
     """
-    Create SRT subtitled video from video URL (for app.py)
+    Create enhanced SRT subtitled video from video URL (for app.py)
     
     Args:
         video_url (str): YouTube or TikTok URL
-        subtitle_config (dict): Subtitle settings
+        subtitle_config (dict): Basic subtitle settings
         language (str): Language code for Whisper ('tr', 'en', etc.)
+        advanced_config (dict): Advanced subtitle effects configuration
     
     Returns:
         tuple: (success, output_video_path, srt_path, error_message)
     """
     temp_dir = None
     try:
-        print(f"🎥 Starting SRT subtitle process...")
+        print(f"🎥 Starting enhanced SRT subtitle process...")
         print(f"📹 Video URL: {video_url}")
         print(f"🌍 Language: {language}")
         print(f"🎨 Subtitle settings: {subtitle_config}")
+        print(f"✨ Advanced config: {advanced_config}")
+        
+        # Gelişmiş işlemci oluştur
+        advanced_processor = None
+        if advanced_config:
+            advanced_processor = AdvancedSubtitleProcessor()
+            advanced_processor.set_preferences_from_gradio(
+                font_size=advanced_config.get('font_size', subtitle_config.get('font_size', 28)),
+                font_color=advanced_config.get('font_color', subtitle_config.get('font_color', '#FFFF00')),
+                text_position=advanced_config.get('text_position', subtitle_config.get('text_position', 'bottom')),
+                font_family=advanced_config.get('font_family', subtitle_config.get('font_family', 'Arial Black')),
+                effect_type=advanced_config.get('effect_type', 'fade'),
+                outline_size=advanced_config.get('outline_size', 3),
+                shadow_size=advanced_config.get('shadow_size', 2),
+                opacity=advanced_config.get('opacity', 1.0)
+            )
         
         # 1. Download video and audio
         print("📥 Downloading video...")
@@ -503,26 +805,28 @@ def process_video_with_srt(video_url, subtitle_config=None, language='tr'):
         srt_path = transcribe_audio_to_srt(audio_path, language=language)
         
         # 4. Determine output filename
-        output_filename = f"srt_subtitled_{safe_basename}"
+        prefix = "enhanced_srt" if advanced_processor else "srt_subtitled"
+        output_filename = f"{prefix}_{safe_basename}"
         output_path = os.path.join(os.getcwd(), output_filename)
         
         print(f"📁 Output file: {output_filename}")
         
-        # 5. Add subtitles to video (use safe video file)
-        print("🎬 Adding subtitles to video...")
-        success = add_subtitles_to_video(safe_video_path, srt_path, output_path, subtitle_config)
+        # 5. Add enhanced subtitles to video
+        print("🎬 Adding enhanced subtitles to video...")
+        success = add_subtitles_to_video(safe_video_path, srt_path, output_path, subtitle_config, advanced_processor)
         
         if success:
             # Clean up temporary files
             cleanup_temp_files(temp_dir)
-            return True, output_path, srt_path, None
+            effect_info = f" with {advanced_config.get('effect_type', 'fade')} effects" if advanced_processor else ""
+            return True, output_path, srt_path, f"Enhanced subtitles added successfully{effect_info}!"
         else:
             # Clean up temporary files
             cleanup_temp_files(temp_dir)
-            return False, None, srt_path, "Subtitle addition failed"
+            return False, None, srt_path, "Enhanced subtitle addition failed"
             
     except Exception as e:
-        error_msg = f"SRT process error: {str(e)}"
+        error_msg = f"Enhanced SRT process error: {str(e)}"
         print(f"❌ {error_msg}")
         
         # Clean up temporary files

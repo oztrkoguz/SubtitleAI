@@ -341,7 +341,9 @@ class YouTubeToText:
             )
             
             # LLM (Ollama)
+            print("🔧 Starting LLM initialization...")
             try:
+                print("🔄 Creating ChatOllama instance...")
                 self.llm = ChatOllama(
                     model="phi4:latest",  # Default model
                     temperature=0.1,
@@ -349,10 +351,20 @@ class YouTubeToText:
                     num_predict=512,
                     verbose=False
                 )
+                print("✅ ChatOllama instance created successfully!")
+                
+                print("🔄 Testing LLM with simple query...")
+                test_response = self.llm.invoke("Hello")
+                print(f"✅ LLM test successful! Response: {test_response}")
+                
                 print("✅ RAG system ready!")
             except Exception as e:
-                print(f"⚠️ LLM could not be loaded: {e}")
-                print("💡 Ollama not installed - only similarity search available")
+                print(f"❌ LLM initialization failed: {e}")
+                print(f"❌ Error type: {type(e).__name__}")
+                print("💡 Possible solutions:")
+                print("   1. Check if Ollama is running: ollama serve")
+                print("   2. Check if phi4:latest model exists: ollama list")
+                print("   3. Pull the model: ollama pull phi4:latest")
                 self.llm = None
                 
         except Exception as e:
@@ -401,9 +413,23 @@ class YouTubeToText:
     
     def setup_qa_system(self):
         """Setup question-answer system"""
-        if not self.enable_rag or not self.vector_store or not self.llm:
-            print("❌ QA system cannot be setup - requirements not met")
+        print("🔧 Starting QA system setup...")
+        print(f"🔍 QA System Debug:")
+        print(f"   - enable_rag: {self.enable_rag}")
+        print(f"   - vector_store exists: {self.vector_store is not None}")
+        print(f"   - llm exists: {self.llm is not None}")
+        
+        if not self.enable_rag:
+            print("❌ QA system cannot be setup - RAG not enabled")
             return False
+        if not self.vector_store:
+            print("❌ QA system cannot be setup - Vector store not available")
+            return False
+        if not self.llm:
+            print("❌ QA system cannot be setup - LLM not available")
+            return False
+        
+        print("✅ All requirements met, proceeding with QA setup...")
         
         try:
             # English prompt template

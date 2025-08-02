@@ -19,27 +19,70 @@ LANGUAGES = {
     'Turkish': 'tr'
 }
 
-# Predefined colors for subtitles
+# Predefined colors for subtitles - Enhanced color palette
 SUBTITLE_COLORS = {
     'Yellow': '#FFFF00',
     'White': '#FFFFFF',
     'Red': '#FF0000',
     'Green': '#00FF00',
-    'Blue': '#0000FF',
-    'Orange': '#FFA500',
-    'Pink': '#FFC0CB'
+    'Blue': '#0080FF',
+    'Purple': '#FF00FF',
+    'Orange': '#FF8000',
+    'Pink': '#FF80C0',
+    'Gold': '#FFD700',
+    'Silver': '#C0C0C0',
+    'Neon Green': '#39FF14',
+    'Neon Blue': '#1B03A3',
+    'Turquoise': '#40E0D0',
+    'Lavender': '#E6E6FA',
+    'Lime': '#32CD32'
 }
 
-# Available fonts - dinamik olarak fonts klasöründen yükle
+# Advanced subtitle effects
+SUBTITLE_EFFECTS = {
+    'fade': 'Smooth Fade',
+    'slide_up': 'Slide Up',
+    'slide_down': 'Slide Down',
+    'slide_left': 'Slide Left',
+    'slide_right': 'Slide Right',
+    'zoom': 'Zoom In/Out',
+    'zoom_in': 'Zoom In',
+    'zoom_out': 'Zoom Out',
+    'glow': 'Glow Effect',
+    'shake': 'Shake',
+    'rotate_cw': 'Rotate Clockwise',
+    'rotate_ccw': 'Rotate Counter-Clockwise',
+    'wave': 'Wave Motion',
+    'pulse': 'Pulse',
+    'flip': 'Flip',
+    'spiral': 'Spiral',
+    'elastic': 'Elastic',
+    'bounce': 'Bounce',
+    'mixed': 'Mixed (Random)',
+    'none': 'No Effect'
+}
+
+# Advanced position options
+SUBTITLE_POSITIONS = {
+    'bottom': 'Bottom Center',
+    'bottom_left': 'Bottom Left',
+    'bottom_right': 'Bottom Right',
+    'middle': 'Middle Center',
+    'top': 'Top Center',
+    'top_left': 'Top Left',
+    'top_right': 'Top Right'
+}
+
+# Available fonts - dynamically load from fonts folder
 def get_available_fonts():
     fonts_dir = os.path.join(os.getcwd(), 'fonts')
-    fonts = {'Default': None}  # Varsayılan font
+    fonts = {'Default': None}  # Default font
     
-    # Fonts klasörü yoksa oluştur
+    # Create fonts folder if it doesn't exist
     if not os.path.exists(fonts_dir):
         os.makedirs(fonts_dir)
-        print(f"Fonts klasörü oluşturuldu: {fonts_dir}")
-        print("TTF font dosyalarınızı bu klasöre ekleyebilirsiniz.")
+        print(f"Fonts folder created: {fonts_dir}")
+        print("You can add your TTF font files to this folder.")
     
     if os.path.exists(fonts_dir):
         font_count = 0
@@ -50,30 +93,30 @@ def get_available_fonts():
                 fonts[font_name] = font_path
                 font_count += 1
         
-        print(f"Fonts klasöründen {font_count} adet font yüklendi.")
+        print(f"Loaded {font_count} fonts from fonts folder.")
         if font_count == 0:
-            print("Fonts klasörü boş. TTF dosyalarınızı ekleyin.")
+            print("Fonts folder is empty. Add your TTF files.")
                 
     return fonts
 
 SUBTITLE_FONTS = get_available_fonts()
 
-# Global RAG sistemi
+# Global RAG system
 rag_system = None
 current_transcript = ""
 
 def initialize_rag_system():
-    """RAG sistemini başlat"""
+    """Initialize RAG system"""
     global rag_system
     try:
         rag_system = YouTubeToText(
             enable_rag=True,
             embedding_model="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
         )
-        print("✅ RAG sistemi başlatıldı")
+        print("✅ RAG system initialized")
         return True
     except Exception as e:
-        print(f"❌ RAG sistem hatası: {e}")
+        print(f"❌ RAG system error: {e}")
         return False
 
 def setup_chatbot_only(video_input, youtube_url, tiktok_url, selected_lang):
@@ -114,8 +157,9 @@ def setup_chatbot_only(video_input, youtube_url, tiktok_url, selected_lang):
     except Exception as e:
         return f"❌ RAG error: {str(e)}", gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)
 
-def process_video_with_lang(video_input, youtube_url, tiktok_url, selected_lang, font_size, font_color, text_position, font_family):
-    """Process video and generate summary"""
+def process_video_with_lang(video_input, youtube_url, tiktok_url, selected_lang, font_size, font_color, text_position, font_family,
+                           effect_type, outline_size, shadow_size, opacity, enable_advanced):
+    """Process video and generate summary with enhanced subtitles"""
     global current_transcript, rag_system
     
     try:
@@ -144,42 +188,96 @@ def process_video_with_lang(video_input, youtube_url, tiktok_url, selected_lang,
         
         # 3. Language check and translation
         lang_code = LANGUAGES[selected_lang]
-        print(f"[APP] Çeviri fonksiyonu çağrılıyor - target_lang: {lang_code}")
+        print(f"[APP] Translation function called - target_lang: {lang_code}")
         # Translate if not English
         if lang_code != 'en':
             print("Translating descriptions...")
             scene_descriptions = translate_and_enhance_with_ollama(original_descriptions, lang_code)
             print("\nFirst scene description:")
             print(f"Original (EN): {original_descriptions[0]}")
-            print(f"Enhanced (TR): {scene_descriptions[0]}")
+            print(f"Enhanced ({lang_code.upper()}): {scene_descriptions[0]}")
         else:
             scene_descriptions = original_descriptions
         
-        # 4. Create subtitled video
+        # 4. Create enhanced subtitled video configuration
+        # Position conversion
+        position_key = 'bottom'
+        for key, value in SUBTITLE_POSITIONS.items():
+            if value == text_position:
+                position_key = key
+                break
+        
         subtitle_config = {
             'font_size': font_size,
             'font_color': SUBTITLE_COLORS[font_color],
-            'text_position': text_position,
+            'text_position': position_key,
             'font_family': SUBTITLE_FONTS[font_family]
         }
         
-        # 5. Create TTS video
-        final_video = create_video_with_tts(
-            create_subtitled_video(
+        # Advanced settings (if enabled)
+        advanced_config = None
+        if enable_advanced:
+            # Find effect key
+            effect_key = 'fade'
+            for key, value in SUBTITLE_EFFECTS.items():
+                if value == effect_type:
+                    effect_key = key
+                    break
+            
+            advanced_config = {
+                'font_size': font_size,
+                'font_color': SUBTITLE_COLORS[font_color],
+                'text_position': position_key,
+                'font_family': SUBTITLE_FONTS[font_family] or 'Arial Black',
+                'effect_type': effect_key,
+                'outline_size': outline_size,
+                'shadow_size': shadow_size,
+                'opacity': opacity
+            }
+        
+        print(f"✨ {'Enhanced ' if enable_advanced else 'Basic '}subtitle settings applying...")
+        if advanced_config:
+            print(f"Effect: {effect_type}, Outline: {outline_size}px, Shadow: {shadow_size}px")
+        
+        # 5. Create enhanced subtitled video
+        if enable_advanced:
+            # Use enhanced subtitle system (subtitle.py needs to be updated)
+            subtitled_video = create_subtitled_video(
+                video_path=video_path, 
+                scene_descriptions=scene_descriptions, 
+                scene_times=scene_times,
+                subtitle_config=subtitle_config,
+                advanced_config=advanced_config
+            )
+        else:
+            # Use existing system
+            subtitled_video = create_subtitled_video(
                 video_path=video_path, 
                 scene_descriptions=scene_descriptions, 
                 scene_times=scene_times,
                 subtitle_config=subtitle_config
-            ), 
+            )
+        
+        # 6. Create TTS video
+        final_video = create_video_with_tts(
+            subtitled_video, 
             scene_descriptions,  
             scene_times, 
             lang=lang_code
         )
         
-        # 6. Generate summary in selected language
+        # 7. Generate summary in selected language
         summary = summarize_with_ollama(scene_descriptions, lang=lang_code)
         
-        # 7. RAG sistemi için transkript oluştur (sadece URL'ler için)
+        # Add enhanced information
+        if enable_advanced:
+            summary += f"\n\n✨ Enhanced Subtitle Effects:\n"
+            summary += f"- Effect: {effect_type}\n"
+            summary += f"- Outline: {outline_size}px, Shadow: {shadow_size}px\n"
+            summary += f"- Opacity: {opacity:.1f}\n"
+            summary += f"- Position: {text_position}"
+        
+        # 8. Create transcript for RAG system (URLs only)
         rag_status = "RAG system not available (URLs only)"
         chat_interface_visible = False
         
@@ -198,7 +296,7 @@ def process_video_with_lang(video_input, youtube_url, tiktok_url, selected_lang,
             except Exception as e:
                 rag_status = f"❌ RAG error: {str(e)}"
         
-        # 8. Clean up temp files
+        # 9. Clean up temp files
         try:
             os.remove(video_path)
         except:
@@ -243,10 +341,11 @@ def clear_chat():
     """Clear chat history"""
     return []
 
-def process_srt_subtitles(video_input, youtube_url, tiktok_url, selected_lang, font_size, font_color, text_position, font_family):
-    """SRT altyazı ile video işle - Whisper kullanarak"""
+def process_srt_subtitles(video_input, youtube_url, tiktok_url, selected_lang, font_size, font_color, text_position, font_family, 
+                          effect_type, outline_size, shadow_size, opacity, enable_advanced):
+    """Process video with SRT subtitles - Enhanced effects"""
     try:
-        # 1. Video URL'sini belirle - Öncelik: TikTok > YouTube > Upload
+        # 1. Determine video URL - Priority: TikTok > YouTube > Upload
         video_url = None
         if tiktok_url and tiktok_url.strip():
             video_url = tiktok_url.strip()
@@ -256,57 +355,95 @@ def process_srt_subtitles(video_input, youtube_url, tiktok_url, selected_lang, f
             video_url = video_input
         
         if not video_url:
-            return None, "❌ SRT altyazı oluşturma için video URL'si gerekli (YouTube veya TikTok). Lütfen geçerli bir URL girin."
+            return None, "❌ Video URL required for SRT subtitle creation (YouTube or TikTok). Please enter a valid URL."
         
-        # 2. Dil kodunu çevir
+        # 2. Convert language code
         lang_code = LANGUAGES[selected_lang]
         
-        # 3. Altyazı ayarlarını hazırla
+        # 3. Prepare basic subtitle settings
         subtitle_config = {
             'font_size': font_size,
             'font_color': SUBTITLE_COLORS[font_color],
-            'text_position': text_position,
+            'text_position': text_position.replace(' ', '_').lower() if text_position in SUBTITLE_POSITIONS.values() else list(SUBTITLE_POSITIONS.keys())[list(SUBTITLE_POSITIONS.values()).index(text_position)] if text_position in SUBTITLE_POSITIONS.values() else 'bottom',
             'font_family': SUBTITLE_FONTS[font_family]
         }
         
-        print(f"🎬 SRT Altyazı işlemi başlıyor...")
-        print(f"📹 URL: {video_url}")
-        print(f"🌍 Dil: {selected_lang} ({lang_code})")
-        print(f"🎨 Altyazı ayarları: {subtitle_config}")
+        # 4. Prepare advanced settings (if enabled)
+        advanced_config = None
+        if enable_advanced:
+            # Find position key
+            position_key = 'bottom'
+            for key, value in SUBTITLE_POSITIONS.items():
+                if value == text_position:
+                    position_key = key
+                    break
+            
+            # Find effect key
+            effect_key = 'fade'
+            for key, value in SUBTITLE_EFFECTS.items():
+                if value == effect_type:
+                    effect_key = key
+                    break
+            
+            advanced_config = {
+                'font_size': font_size,
+                'font_color': SUBTITLE_COLORS[font_color],
+                'text_position': position_key,
+                'font_family': SUBTITLE_FONTS[font_family] or 'Arial Black',
+                'effect_type': effect_key,
+                'outline_size': outline_size,
+                'shadow_size': shadow_size,
+                'opacity': opacity
+            }
         
-        # 4. SRT ile video işle
+        print(f"🎬 {'Enhanced ' if enable_advanced else ''}SRT Subtitle processing starting...")
+        print(f"📹 URL: {video_url}")
+        print(f"🌍 Language: {selected_lang} ({lang_code})")
+        print(f"🎨 Basic settings: {subtitle_config}")
+        if advanced_config:
+            print(f"✨ Advanced settings: {advanced_config}")
+        
+        # 5. Process video with SRT
         success, output_video_path, srt_path, error_message = process_video_with_srt(
             video_url=video_url,
             subtitle_config=subtitle_config,
-            language=lang_code
+            language=lang_code,
+            advanced_config=advanced_config
         )
         
         if success:
-            # Başarı mesajı oluştur
-            success_msg = f"✅ SRT Altyazılı video başarıyla oluşturuldu!\n\n"
+            # Create success message
+            success_msg = f"✅ {'Enhanced ' if enable_advanced else ''}SRT Subtitled video created successfully!\n\n"
             success_msg += f"📹 Video: {os.path.basename(output_video_path)}\n"
-            success_msg += f"📄 SRT dosyası: {os.path.basename(srt_path) if srt_path else 'N/A'}\n"
-            success_msg += f"🌍 Dil: {selected_lang}\n"
-            success_msg += f"🎨 Font boyutu: {font_size}, Renk: {font_color}, Pozisyon: {text_position}"
+            success_msg += f"📄 SRT file: {os.path.basename(srt_path) if srt_path else 'N/A'}\n"
+            success_msg += f"🌍 Language: {selected_lang}\n"
+            success_msg += f"🎨 Font: {font_size}px {font_color} - {text_position}\n"
+            if enable_advanced:
+                success_msg += f"✨ Effect: {effect_type}\n"
+                success_msg += f"🖼️ Outline: {outline_size}px, Shadow: {shadow_size}px\n"
+                success_msg += f"🔍 Opacity: {opacity:.1f}"
+            
+            if error_message and "successfully" in error_message:
+                success_msg += f"\n\n{error_message}"
             
             return output_video_path, success_msg
         else:
-            error_msg = f"❌ SRT altyazı oluşturma başarısız!\n\n"
+            error_msg = f"❌ {'Enhanced ' if enable_advanced else ''}SRT subtitle creation failed!\n\n"
             if error_message:
-                error_msg += f"Hata: {error_message}\n\n"
+                error_msg += f"Error: {error_message}\n\n"
             if srt_path:
-                error_msg += f"📄 SRT dosyası oluşturuldu: {os.path.basename(srt_path)}\n"
-                error_msg += "💡 SRT dosyasını video oynatıcınıza manuel olarak yükleyebilirsiniz."
+                error_msg += f"📄 SRT file created: {os.path.basename(srt_path)}\n"
+                error_msg += "💡 You can manually load the SRT file into your video player."
             
             return None, error_msg
             
     except Exception as e:
-        error_msg = f"❌ SRT işlemi sırasında beklenmeyen hata: {str(e)}"
+        error_msg = f"❌ Unexpected error during {'Enhanced ' if enable_advanced else ''}SRT processing: {str(e)}"
         return None, error_msg
 
 # Gradio interface
 def create_interface():
-    # RAG sistemini başlat
+    # Initialize RAG system
     initialize_rag_system()
     
     with gr.Blocks(
@@ -362,8 +499,17 @@ def create_interface():
                 with gr.Group(elem_classes="video-section"):
                     gr.Markdown("### 🎨 Subtitle Settings")
                     
+                    # Advanced mode toggle
+                    enable_advanced = gr.Checkbox(
+                        label="✨ Enable Advanced Subtitle Effects",
+                        value=False,
+                        info="Animations, effects, outline and shadow settings"
+                    )
+                    
                     with gr.Row():
-                        with gr.Column():
+                        with gr.Column(scale=1):
+                            gr.Markdown("#### 🔤 Basic Settings")
+                            
                             font_size = gr.Slider(
                                 minimum=20,
                                 maximum=80,
@@ -384,11 +530,51 @@ def create_interface():
                                 label="🔤 Font Family"
                             )
                             
-                            text_position = gr.Radio(
-                                choices=["bottom", "top", "middle"],
-                                value="bottom",
+                            text_position = gr.Dropdown(
+                                choices=list(SUBTITLE_POSITIONS.values()),
+                                value="Bottom Center",
                                 label="📍 Text Position"
                             )
+                        
+                        with gr.Column(scale=1, visible=False) as advanced_column:
+                            gr.Markdown("#### ✨ Advanced Effects")
+                            
+                            effect_type = gr.Dropdown(
+                                choices=list(SUBTITLE_EFFECTS.values()),
+                                value="Smooth Fade",
+                                label="🎬 Animation Effect"
+                            )
+                            
+                            outline_size = gr.Slider(
+                                minimum=0,
+                                maximum=8,
+                                value=3,
+                                step=1,
+                                label="🖼️ Outline Thickness (px)"
+                            )
+                            
+                            shadow_size = gr.Slider(
+                                minimum=0,
+                                maximum=8,
+                                value=2,
+                                step=1,
+                                label="🌆 Shadow Size (px)"
+                            )
+                            
+                            opacity = gr.Slider(
+                                minimum=0.1,
+                                maximum=1.0,
+                                value=1.0,
+                                step=0.1,
+                                label="🔍 Opacity"
+                            )
+                    
+                    # Control advanced settings visibility
+                    enable_advanced.change(
+                        fn=lambda x: gr.update(visible=x),
+                        inputs=enable_advanced,
+                        outputs=advanced_column
+                    )
                 
                 # Action buttons
                 with gr.Group(elem_classes="button-section"):
@@ -470,7 +656,12 @@ def create_interface():
                 font_size,
                 font_color,
                 text_position,
-                font_family
+                font_family,
+                effect_type,
+                outline_size,
+                shadow_size,
+                opacity,
+                enable_advanced
             ],
             outputs=[
                 output_video, 
@@ -505,7 +696,12 @@ def create_interface():
                 font_size,
                 font_color,
                 text_position,
-                font_family
+                font_family,
+                effect_type,
+                outline_size,
+                shadow_size,
+                opacity,
+                enable_advanced
             ],
             outputs=[
                 output_video, 
@@ -539,10 +735,11 @@ def create_interface():
         - **Upload a video file** OR **Enter YouTube/TikTok URL**
         - **Select language** for transcription and descriptions
         - **Customize subtitle settings** (font, color, position)
+        - **✨ Enable Advanced Effects** for professional-grade subtitles
         
         #### 🚀 Step 2 - Choose Action:
-        - **🎬 Process Video**: Creates AI-described subtitled video with TTS
-        - **📝 Generate SRT Subtitles**: Creates accurate Whisper-based subtitles with custom styling
+        - **🎬 Process Video**: Creates AI-described subtitled video with TTS + Advanced Effects
+        - **📝 Generate SRT Subtitles**: Creates accurate Whisper-based subtitles with enhanced styling
         - **🤖 Setup Chatbot Only**: Quick chatbot setup without video processing
         
         #### 💬 Step 3 - Video Chat:
@@ -553,22 +750,46 @@ def create_interface():
         #### ⚠️ Important Notes:
         - **SRT subtitles and chatbot require URLs** (YouTube/TikTok) - not uploaded files
         - **TikTok videos** optimized for short content analysis
-        - **AI Processing** includes descriptions + TTS + chatbot
+        - **AI Processing** includes descriptions + TTS + chatbot + advanced effects
         - **SRT Generation** uses Whisper for accurate transcription with dynamic styling
         - **Chatbot only** is fastest for quick Q&A
         
-        #### 🎨 SRT Subtitle Features:
-        - **Dynamic Font Size**: 20-80 pixels from slider
-        - **Custom Colors**: Yellow, White, Red, Green, Blue, Orange, Pink
+        #### 🎨 Enhanced Subtitle Features:
+        
+        **🔤 Basic Settings:**
+        - **Dynamic Font Size**: 20-80 pixels adjustable
+        - **Rich Color Palette**: 15 colors including Neon, Gold, Silver variants
         - **Font Selection**: Uses TTF fonts from fonts folder
-        - **Position Control**: Bottom, Top, Middle placement
-        - **Multi-language**: Supports Turkish, English transcription
+        - **Smart Positioning**: 7 positions (corners, edges, center)
+        
+        **✨ Advanced Effects (when enabled):**
+        - **Animations**: Fade, Slide (4 directions), Zoom, Pulse, Wave, Shake
+        - **Special Effects**: Glow, Rotation, Flip, Spiral, Elastic, Bounce
+        - **Mixed Mode**: Random combination of effects
+        - **Outline Control**: 0-8px customizable borders
+        - **Shadow Effects**: 0-8px depth with transparency
+        - **Opacity Control**: 0.1-1.0 transparency levels
+        
+        **🎬 Effect Examples:**
+        - **Slide Up**: Text enters from bottom with smooth motion
+        - **Pulse**: Rhythmic size changes for emphasis
+        - **Glow**: Soft blur-to-sharp transition
+        - **Mixed**: Combines multiple effects randomly
         
         #### 🔧 Requirements:
         - **Ollama** with `phi4:latest` and `gemma3:4b` models (for AI processing)
         - **Whisper** for SRT subtitle generation
         - **FFmpeg** for audio/video processing
+        - **PIL/Pillow** for advanced subtitle rendering
         - **Internet connection** for URL-based videos
+        
+        #### 🎆 New in This Version:
+        - **✨ Advanced subtitle effects system** inspired by professional video editing
+        - **🎨 15+ color options** with neon and metallic variants
+        - **🎬 20+ animation effects** for dynamic presentations
+        - **🖼️ Customizable outlines and shadows** for better readability
+        - **🔍 Transparency controls** for subtle or bold appearances
+        - **📍 7-point positioning system** for precise placement
         """, elem_classes="main-container")
     
     return interface
