@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 import random
 
 class AdvancedSubtitleProcessor:
-    """Gelişmiş altyazı işleme sınıfı - ffmeg_stil_font2.py'den uyarlandı"""
     
     def __init__(self):
         self.user_preferences = {}
