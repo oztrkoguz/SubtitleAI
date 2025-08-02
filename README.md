@@ -4,7 +4,8 @@
 
 SubtitleAI is an advanced tool that processes YouTube and TikTok videos to generate scene descriptions, translate them, create subtitled videos with text-to-speech narration, and provides an intelligent chatbot for video content analysis. This project leverages state-of-the-art models for video processing, translation, text-to-speech synthesis, and RAG-based question answering.
 
-<img width="1920" height="2440" alt="gradio" src="https://github.com/user-attachments/assets/44411fcc-ea37-4206-ac7b-a03ed75d13f0" />
+<img width="1920" height="2208" alt="gradioo" src="https://github.com/user-attachments/assets/e487576b-7bbf-4a9c-a5d4-fffeb567cfcb" />
+
 
 
 

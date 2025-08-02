@@ -68,7 +68,6 @@ class AdvancedSubtitleProcessor:
     
     def set_preferences_from_gradio(self, font_size, font_color, text_position, font_family, 
                                    effect_type='fade', outline_size=3, shadow_size=2, opacity=1.0):
-        """Gradio arayüzünden gelen ayarları işle"""
         self.user_preferences = {
             'color': {'name': font_color, 'hex': font_color if font_color.startswith('#') else self.colors.get(font_color, '#FFFF00')},
             'effect': {'name': self.effects.get(effect_type, 'Yumuşak Geçiş'), 'code': effect_type},
@@ -79,16 +78,8 @@ class AdvancedSubtitleProcessor:
             'shadow': {'name': f'Gölge ({shadow_size}px)', 'value': str(shadow_size)},
             'opacity': {'name': f'Şeffaflık ({opacity})', 'value': opacity}
         }
-        
-        print(f"✅ Gelişmiş altyazı ayarları uygulandı:")
-        print(f"   Renk: {self.user_preferences['color']['name']}")
-        print(f"   Efekt: {self.user_preferences['effect']['name']}")
-        print(f"   Konum: {self.user_preferences['position']['name']}")
-        print(f"   Font: {self.user_preferences['font_name']} ({font_size}px)")
-        print(f"   Çerçeve: {outline_size}px, Gölge: {shadow_size}px")
     
     def get_enhanced_text_properties(self):
-        """Gelişmiş metin özelliklerini döndür"""
         if not self.user_preferences:
             return {
                 'color': '#FFFF00',
@@ -117,7 +108,6 @@ class AdvancedSubtitleProcessor:
         }
     
     def apply_text_effects(self, text, time_position=0.0):
-        """Metne zaman bazlı efektler uygula"""
         if not self.user_preferences:
             return text, {}
         
