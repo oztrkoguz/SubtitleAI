@@ -34,36 +34,36 @@ class AdvancedSubtitleProcessor:
         }
         
         self.effects = {
-            'fade': 'Yumuşak Geçiş',
-            'slide_up': 'Kaydırma Yukarı',
-            'slide_down': 'Kaydırma Aşağı', 
-            'slide_left': 'Kaydırma Sol',
-            'slide_right': 'Kaydırma Sağ',
+            'fade': 'Smooth Fade',
+            'slide_up': 'Slide Up',
+            'slide_down': 'Slide Down', 
+            'slide_left': 'Slide Left',
+            'slide_right': 'Slide Right',
             'zoom': 'Zoom In/Out',
             'zoom_in': 'Zoom In',
             'zoom_out': 'Zoom Out',
-            'glow': 'Parlama',
-            'shake': 'Titreşim',
-            'rotate_cw': 'Döndürme Saat Yönü',
-            'rotate_ccw': 'Döndürme Ters Yön', 
-            'wave': 'Dalgalanma',
-            'pulse': 'Nabız',
-            'flip': 'Yansıma',
+            'glow': 'Glow Effect',
+            'shake': 'Shake',
+            'rotate_cw': 'Rotate Clockwise',
+            'rotate_ccw': 'Rotate Counter-Clockwise', 
+            'wave': 'Wave Motion',
+            'pulse': 'Pulse',
+            'flip': 'Flip',
             'spiral': 'Spiral',
-            'elastic': 'Elastik',
-            'bounce': 'Sıçrama',
-            'mixed': 'Karışık (Rastgele)',
-            'none': 'Efektsiz'
+            'elastic': 'Elastic',
+            'bounce': 'Bounce',
+            'mixed': 'Mixed (Random)',
+            'none': 'No Effect'
         }
         
         self.positions = {
-            'bottom': 'Alt Orta',
-            'bottom_left': 'Alt Sol',
-            'bottom_right': 'Alt Sağ',
-            'middle': 'Orta',
-            'top': 'Üst Orta',
-            'top_left': 'Üst Sol',
-            'top_right': 'Üst Sağ'
+            'bottom': 'Bottom Center',
+            'bottom_left': 'Bottom Left',
+            'bottom_right': 'Bottom Right',
+            'middle': 'Middle Center',
+            'top': 'Top Center',
+            'top_left': 'Top Left',
+            'top_right': 'Top Right'
         }
     
     def set_preferences_from_gradio(self, font_size, font_color, text_position, font_family, 
