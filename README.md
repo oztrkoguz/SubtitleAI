@@ -44,6 +44,13 @@ https://github.com/user-attachments/assets/82b2cba2-603e-418e-84f8-cb71044b9f60
 - **Multi-language Support**: Generate subtitles in Turkish, English, and other languages
 - **SRT File Export**: Standard SRT format compatible with all video players
 
+### ✨ Advanced Subtitle Effects (NEW!)
+- **20+ Animation Effects**: Smooth Fade, Slide (4 directions), Zoom, Pulse, Wave, Shake, Rotate, Bounce, Spiral, Elastic, and more
+- **Professional Styling**: Outline thickness (0-8px), shadow effects (0-8px), opacity control (0.1-1.0)
+- **Smart Positioning**: 7 position options (corners, edges, center)
+- **Mixed Mode**: Random effect combinations for dynamic presentations
+- **Font Customization**: TTF font support from fonts folder
+
 ### 🤖 Video Chatbot (NEW!)
 - **RAG-based Q&A**: Ask questions about video content using advanced RAG system
 - **Audio-to-Text**: Convert video audio to text using Whisper or Google Speech Recognition
@@ -106,6 +113,7 @@ https://github.com/user-attachments/assets/82b2cba2-603e-418e-84f8-cb71044b9f60
 3. **Configure Settings:**
    - Select language (English/Turkish)
    - Customize subtitle settings (font, color, position)
+   - **✨ Enable Advanced Effects**: Animations, outline, shadow, opacity
 
 4. **Process Video:**
    - Click "🎬 Process Video" button
@@ -135,6 +143,7 @@ https://github.com/user-attachments/assets/82b2cba2-603e-418e-84f8-cb71044b9f60
 2. **Configure Subtitle Settings:**
    - Select transcription language (Turkish/English)
    - Choose font size, color, and position
+   - **✨ Enable Advanced Effects**: Professional animations and styling
 
 3. **Generate SRT Subtitles:**
    - Click "📝 Generate SRT Subtitles" button
@@ -152,7 +161,7 @@ https://github.com/user-attachments/assets/82b2cba2-603e-418e-84f8-cb71044b9f60
 - **subtitle.py**: Subtitle creation and video rendering
 - **tts.py**: Text-to-speech audio generation
 - **video_chat.py**: RAG-based chatbot system with audio-to-text conversion
-- **srt_subtitle.py**: SRT subtitle generation with Whisper transcription
+- **srt_subtitle.py**: SRT subtitle generation with Whisper transcription and advanced effects
 
 
 ## 🤖 Models & Technologies Used
